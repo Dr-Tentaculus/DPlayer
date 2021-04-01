@@ -37,20 +37,28 @@
 					<div id='playLists'>
 						<play-list
 							v-for="playList in aPlayLists"
-							key="playList.id"
+							:key="playList.id"
 							:id="playList.id"
 							:title="playList.title"
 							:img="playList.img"
 							:color="playList.color"
 							:group="playList.group"
-							:volume="playList.volume"
+							:volume="Number(playList.volume)"							
 							
+							:loop="playList.config.loop"
+							:compact="playList.config.compact"
+							:plaing="playList.config.plaing"
+							
+							:tindex="playList.trackIndex"
+							:list="playList.list"
+							
+							@play="play"
+							@pause="pause"
+							@random="random"
+							@next="nextTrack"
+							@volumed="volumeChanged"
 							>
-								<pl-track 
-									v-for="track in playList.list"
-									key="track.path"
-									:src="track.path"
-								/>
+								
 						</play-list>
 					</div>
 				<!--

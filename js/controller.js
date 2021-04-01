@@ -332,10 +332,29 @@ Vue.component('playList', {
 			type: String,
 			default: ""
 		},
+		loop: {
+			type: Boolean,
+			default: false
+		},
+		compact: {
+			type: Boolean,
+			default: false
+		},
+		plaing: {
+			type: Boolean,
+			default: false
+		},
 		volume: {
 			type: Number,
 			default: 60
 		},
+		tindex: {
+			type: Number,
+			default: 0
+		},
+		list: {
+			type: Array
+		}
 	},
 	data: function(){
 		return {
@@ -343,43 +362,132 @@ Vue.component('playList', {
 		};
 	},
 	computed: {
+		_id: function(){
+			if(this.id != undefined) {
+				return `pl_${this.id}`;
+			} else {
+				return `pl_${new Date().getTime()}`;
+			}			
+		},
+		audio_id: function(){
+			return `a_${this._id}`;
+		},
+		cycle_id: function(){
+			return `cycle_${this._id}`;
+		},
+		compact_id: function(){
+			return `compact_${this._id}`;
+		},
 		
-	},
-	methods: {		
-		remove: function(oEvent){
-			this.$emit('remove', oEvent);
+		audio_src: function(){
+			return (this.list && this.tindex>-1)?this.list[this.tindex].path : "";
+		},
+		_volume: function(){
+			let nVolume = this.volume;
+			/*if(nVolume<0) {
+				nVolume=0;
+			}			
+			if(nVolume>100) {
+				nVolume=100;
+			}		
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {
+				oAudio.volume = nVolume/100;
+			}*/
+			return nVolume;			
 		}
 	},
-	mounted: function(){
+	methods: {		
+		/*remove: function(oEvent){
+			this.$emit('remove', oEvent);
+		},*/
+		
+		onPlay: function(oEvent){
+			this.$emit('play', this.id);
+			
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {
+				/*if(!oAudio.src) {
+					oAudio.src = this.list[this.tindexIndex].path;
+				}*/
+				try{
+					oAudio.play();
+				} catch (error){
+					console.dir(error);
+				}
+			}
+		},		
+		onPause: function(oEvent){
+			this.$emit('pause', this.id);
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {
+				oAudio.pause();
+			}
+		},
+		onRandom: function(oEvent){
+			this.$emit('random', this.id);
+		},
+		onNext: function(oEvent){
+			this.$emit('next', this.id);
+		},
+		onVolumed: function(oEvent){
+			this.$emit('volumed', this.id, oEvent);
+		}
 		
 	},
-	template: `<div class="player_form" data-name="1" data-form-name="Природа" id="player_1">
-		<audio id="a_1"></audio>
+	mounted: function(){
+		debugger;
+		console.dir(this.$el);
+		setTimeout(function(){
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {
+				 oAudio.onended = function(){
+						debugger;
+						this.onNext();
+				}.bind(this);
+				
+				oAudio.addEventListener('loadeddata', function() {
+					if(oAudio.readyState >= 2 && this.plaing) {
+						oAudio.play();
+					}
+				}.bind(this));
+			}
+		}.bind(this), 100);
+		
+		
+	},
+	template: `<div class="player_form" :id="_id">
+		<audio :id="audio_id" :src="audio_src"></audio>
 		<div class="pf_lt">1 Q A Z</div>
 		<div class="pf_sett">
 			<div class="btns">
-				<input type="checkbox" checked="checked" id="ch_Природа" class="btn cycle">
-				<label for="ch_Природа"><i class="fa fa-retweet"></i></label>
-				<button class="btn mix"><i class="fa fa-random"></i></button>
-				<input type="checkbox" id="hd_Природа" class="btn hide">
-				<label for="hd_Природа"><i class="fa fa-eye-slash"></i></label>
+				<input type="checkbox" :checked="loop" :id="cycle_id" class="btn cycle">
+				<label :for="cycle_id"><i class="fa fa-retweet"></i></label>
+				<button class="btn mix" @click="onRandom"><i class="fa fa-random"></i></button>
+				<input type="checkbox" :checked="compact" :id="compact_id" class="btn hide">
+				<label :for="compact_id"><i class="fa fa-eye-slash"></i></label>
 			</div>
 			<div class="vol">
-				<input type="range" orient="vertical" class="volume" min="0" max="50" value="25">
-				<div class="vol_num">50%</div>
+				<input type="range" orient="vertical" class="volume" min="0" max="100" :value="_volume" @change="onVolumed">
+				<div class="vol_num">{{volume}}</div>
 			</div>
 		</div>
 		<div class="pf_play" align="center">
-			<button class="pf_play_bt"> <i class="fa fa-play"></i> </button> 
-			<button class="pf_next_bt"> <i class="fa fa-play"></i><i class="fa fa-play"></i> </button>
+			<button v-show="!this.plaing" class="pf_play_bt" @click="onPlay"> <i class="fa fa-play"></i> </button> 
+			<button v-show="this.plaing" class="pf_play_bt" @click="onPause"> <i class="fa fa-pause"></i> </button> 
+			<button class="pf_next_bt" @click="onNext"> <i class="fa fa-play"></i><i class="fa fa-play"></i> </button>
 		</div>
-		<div class="pf_name">Природа</div>
-		<div class="pf_img" style="display: block;">изображение</div>
-		<div class="pf_list" data-id="9" style="display: block;">
-			<slot>
-			</slot>
+		<div class="pf_name">{{title}}</div>
+		<!--<div class="pf_img" style="display: block;">изображение</div>-->
+		<div class="pf_list" style="display: block;" v-show="!compact">
+			<pl-track 
+				v-for="(track, i) in this.list"
+				:key="i"
+				:src="track.path"
+				:class="{active: i==tindex}"
+			/>
 		</div>
-		<div class="pf_mng" style="display: block;">управление потоком</div>
+		<!--<div class="pf_mng" style="display: block;">управление потоком</div>-->
 	</div>`
 });
 Vue.component('pl-track', {
@@ -396,7 +504,7 @@ Vue.component('pl-track', {
 	},
 	computed: {
 		title: function(){
-			if(this.src && src.length) {
+			if(this.src && this.src.length) {
 				return this.src.split("/").pop();
 			} 
 			return "";
@@ -424,22 +532,29 @@ Vue.component('pl-track', {
 			
 			aPlayLists: [
 				{
-					id: "й",
+					id: "1",
 					order: 0,
 					title: "тест",
 					color: "red",
 					group: "",
 					img: "",
 					config: {
-						random: true,
-						loop: true,
-						compact: false
+						loop: false,
+						compact: false,
+						plaing: false
 					},
-					volume: 60,
+					volume: 6,
+					trackIndex: 0,
 					list: [
 						{
 							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/drops.mp3"
-						}
+						},
+						{
+							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/river.mp3"
+						},
+						{
+							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/forest.mp3"
+						},
 					]
 				}
 			],
@@ -580,7 +695,7 @@ Vue.component('pl-track', {
 			this._loadData();
 			//this._initSortable();
 			this._setHotkeys();
-			this._checkUpdates();
+			//this._checkUpdates();
 
 			w.setSize(this.oWinSizes[this.sAppView].w,this.oWinSizes[this.sAppView].h);
 			if(this.oWin.pos.x !=0 || this.oWin.pos.y != 0){
@@ -613,7 +728,47 @@ Vue.component('pl-track', {
 		},
 		methods: {
 			
-			play: function(oItem){
+			play: function(sPlayListId){
+				debugger;
+				
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.plaing = true;
+				}
+			},
+			pause: function(sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.plaing = false;
+				}
+			},
+			random: function(sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					//oPlayList.config.plaing = false;
+				}
+			},
+			
+			nextTrack: function(sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.trackIndex = oPlayList.trackIndex+1;
+					if(oPlayList.trackIndex >= oPlayList.list.length) {
+						oPlayList.trackIndex = 0;
+					}
+					this.play(sPlayListId);
+				}
+			},
+			volumeChanged: function(sPlayListId, oEvent){
+				//debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {					
+					let nValue = oEvent.target.value;
+					oPlayList.volume = nValue;
+				}
 			},
 			_checkUpdates: async function(){
 				var sUrl = 'https://api.github.com/repos/Etignis/dPlayer/releases';
