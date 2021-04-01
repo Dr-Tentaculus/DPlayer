@@ -1,0 +1,97 @@
+{
+  "name": "dPlayer",
+  "productName": "dPlayer",
+  "version": "1.1.0",
+  "description": "A minimal sound play application",
+  "main": "main.js",
+  "scripts": {
+    "start0": "electron .",
+    "postinstall": "install-app-deps",
+    "pack": "build --dir",
+    "dist": "build",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . dPlayer --overwrite --asar=true --platform=win32 --arch=ia32 --icon=img/fav.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"dPlayer\"",
+    "package-linux": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "repository": "https://github.com/Etignis/dPlayer",
+  "keywords": [
+    "sound",
+    "music",
+    "play",
+    "player"
+  ],
+  "author": {
+    "name": "Tenebrius Etignis",
+    "email": "etignis@gmail.com"
+  },
+  "license": "CC0-1.0",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "dPlayer"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "8.1.1",
+    "electron-packager": "^14.2.1"
+  },
+  "build": {
+    "appId": "dPlayer",
+    "category": "your.app.category.type",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "img/64x64.png"
+    }
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "sortablejs": "^1.10.2",
+    "update-electron-app": "^1.5.0"
+  }
+}

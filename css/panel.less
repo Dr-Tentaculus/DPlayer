@@ -1,0 +1,43 @@
+#top_panel{
+	-webkit-app-region: drag;
+	@w: 1em;
+	@h: @w;
+	.bt, button, input{         
+			min-width: @w;
+			min-height: @h;
+			
+			-webkit-app-region: no-drag;
+	}
+	#p_name{
+			.fr-concave;
+			display: inline-block;
+			min-height: @h;
+			padding: .2em;
+		
+	}
+	input[type='checkbox']{
+			display: none;
+	}
+	
+	input[type='checkbox'] + label{
+					.fr-convex;           
+					background: @m-gray + #111;
+				 // width: 100%;
+					display: inline-block;
+					padding: .3em;
+					&:hover{
+							background: @m-gray + #222;    
+					}
+					&:active{
+							background:  @m-gray;    
+					}
+					input{
+							display: none;
+					}
+			}
+			input[type='checkbox']:checked + label{
+					.fr-concave;
+					background:  @m-gray - #222;  
+					padding: .3em;  
+			}
+}

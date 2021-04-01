@@ -1,0 +1,141 @@
+#mw_playlists_manage{
+	input[type='checkbox']{
+		//display: 
+		& + label{
+			cursor: pointer;
+		}
+		&:checked + label{
+			color: @color;
+		}
+	}
+	.buttonsPlace{
+		margin: .3em 0;
+		button{
+			margin: .1em .2em;
+		}
+	}
+}
+
+#mw_soundlists_manage {
+  max-width: 41rem;
+  margin: 0 auto;
+  .row {
+    display: flex;
+    //flex-wrap: wrap;
+  }
+  .column {
+
+  }
+  .soundColumn {
+    list-style-type: none;
+    margin: 0;
+    padding: 0.3em;
+    border-right: 1px solid @l-gray;
+    li{
+      .row();
+      input{
+        position: relative;
+        top: 0.35rem;
+      }
+    }
+    label{
+      cursor: pointer;
+      transition: background .2s;
+      display: block;
+      background: @white;
+      padding: .1em;
+      flex-grow: 99;
+      &:hover{
+        background: @l-gray;
+      }
+      &.selected{
+        background: darken(@l-gray, 10%);
+      }
+    }
+  }
+  .soundInfo{
+    padding: 0.1em 0.5em;
+  }
+  .soundArr{
+    list-style-type: none;
+    margin: 0;
+    padding: 0.3em;
+    li{
+      display: flex;
+      justify-content: space-between;
+	  &:nth-child(odd){
+		background: lighten(@l-gray, 5%);
+	  }
+    }
+    input {
+      width: 2rem;
+      margin-left: 0.5em;
+    }
+  }
+  .icoSample{
+    min-width: 1.5em;
+    //border: 1px solid lighten(@m-gray, 4%);
+    //border-left: none;
+    //border-radius: 0 3px 3px 0;
+    //margin-right: 0.4em;
+    position: relative;
+    left: -1.5em;
+    z-index: 9;
+  }
+
+  .buttonsPlace {
+    margin: .3em 0;
+    button {
+      margin: .1em .2em;
+
+    }
+  }
+}
+.buttons(){
+  @plc_color: darken(white, 3%);
+  border-radius: 3px 3px 3px 3px;
+  overflow: visible;
+  //background: #fff;
+  border: 1px solid #d8d8d8;
+  border-bottom-width: 2px;
+  border-top-width: 1px;
+  box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  padding: .9em 1.6em;
+  //margin: .5em .5em 0em;
+  background: @plc_color;
+  margin: 0.5em;
+  transition: box-shadow 0.3s, background 0.3s;
+
+  &:hover{
+    background: darken(@color, 2%);
+    box-shadow: 0 2px 5px 0px rgba(0, 0, 0, 0.2);
+  }
+
+  &.white{
+    background: white;
+  }
+}
+#mw_batDB_manage{
+  max-width: 50rem;
+  margin: 0 auto;
+  .inner{
+    margin: 1rem;
+  }
+  .center{
+    text-align: center;
+  }
+  button{
+    .buttons();
+  }
+
+  #mw_batDB_load_input, #mw_batDB_import_input{
+    display: none;
+  }
+}
+
+#mw_sl_OkButton,
+#mw_pl_CancelButton,
+#mw_pl_OkButton{
+  .buttons();
+}

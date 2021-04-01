@@ -1,0 +1,177 @@
+#sounds_container{
+	@sz: @sidePanelWidth;
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	//width: @sz + 0.4em;
+  
+	
+	counter-reset: tracks -1;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap-reverse;
+
+  .hiddenList, .sortable-chosen{
+    //outline: 2px solid red;
+    ul{
+      display: none !important;
+    }
+  }
+
+  .soundButtonContainer{
+	  position: relative;
+		z-index: 9;
+    &:nth-child(n+11){
+      //outline: green 1px solid;
+      .soundButton{
+        &::before{
+          content: "";
+        }
+      }
+    }
+  }
+
+	.soundButton{
+		.fr-convex;
+		width: @sz;
+		height: @sz;
+		padding: .1em;
+		cursor: pointer;
+		display: block;     
+		margin: 0 auto;  
+		background: @m-gray + #111; 
+		position: relative;
+		font-size: 120%;
+		counter-increment: tracks;		
+		z-index: 9;
+        
+			&:hover{
+					background: @m-gray + #222; 
+					.soundSublist{
+						display: flex;
+					}					
+			}
+			&:active{
+					background:  @m-gray;    
+			}
+			
+			&::before{
+					content: counter(tracks);
+					position: absolute;
+					left: .1em;
+					top: 0.1em;
+			}
+      /* &:hover{ */
+        /* .soundSublist{ */
+          /* display: flex; */
+        /* } */
+      /* } */
+    }
+    .soundSublist{
+      list-style-type: none;
+      margin: 0;
+      padding: 0 0.2rem;
+      font-size: 14px;
+      display: none;
+      flex-direction: column;
+      background: darken(@m-gray, 10%);
+      position: absolute;
+      left: -11rem;
+      top: 0;
+      width: 11rem;
+	  
+			z-index: 99;
+      opacity: 0.5;
+      transition: opacity .2s;
+
+      &:hover{
+        opacity: 1;
+      }
+
+      li{
+        cursor: pointer;
+        transition: background .2s;
+        margin: 0.2rem 0;
+        padding: 0.2rem;
+        background: lighten(@m-gray, 5%);
+        overflow: hidden;
+        &:hover {
+          background: lighten(@m-gray, 10%);
+        }
+      }
+    }
+}
+
+/* Big sound */
+
+#sounds_big_panel{
+	&.invisible{
+		display: none;
+		opacity: 0;
+	}
+	transition: opacity .2s;
+	z-index: 9999;
+	
+	counter-reset: big_sounds -1;
+	
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-around;
+	
+	
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	
+	background: rgba(0,0,0,.8);
+	
+	.soundBigButtonContainer{
+		&:nth-child(n+11){
+      //outline: green 1px solid;
+      button{
+        &::before{
+          content: "";
+        }
+      }
+    }
+	}
+	button{
+		@sz: 10rem;
+		.fr-convex;
+		display: flex;
+		flex-wrap: wrap;
+		width: @sz;
+		height: @sz;
+		padding: .1em;
+		cursor: pointer;
+		//display: block;     
+		//margin: 0 auto;  
+		background: @m-gray + #111; 
+		position: relative;
+		font-size: 120%;
+		counter-increment: big_sounds;		
+		//z-index: 9;
+		overflow: hidden;
+        
+			&:hover{
+					background: @m-gray + #222; 									
+			}
+			&:active{
+					background:  @m-gray;    
+			}		
+			
+			&::before{
+					content: counter(big_sounds);
+					position: absolute;
+					left: .1em;
+					top: 0.1em;
+			}
+	}
+	.soundBigButtonText, .soundBigButtonIco{
+		width: 100%;
+	}
+}
