@@ -34,7 +34,7 @@
 				
 				
 				<div id='main'>
-					<div id='playLists'>
+					<div id='playLists' class='page' v-show="page=='PlayLists'">
 						<play-list
 							v-for="playList in aPlayLists"
 							:key="playList.id"
@@ -43,20 +43,39 @@
 							:img="playList.img"
 							:color="playList.color"
 							:group="playList.group"
+							:groups="aPlayListGroups"
 							:volume="Number(playList.volume)"							
 							
 							:loop="playList.config.loop"
 							:compact="playList.config.compact"
 							:plaing="playList.config.plaing"
+							:edit="playList.config.edit"
+							:group_opened="playList.config.group_opened"
 							
 							:tindex="playList.trackIndex"
 							:list="playList.list"
 							
+							
 							@play="play"
 							@pause="pause"
 							@random="random"
+							@compacted="compacted"
+							@looped="looped"
 							@next="nextTrack"
+							@switch="switchTrack"
+							@remove_track="removeTrack"
+							@add_track="addTrack($event, playList.id)"
+							@group_configing="group_configing"
+							@set_group="set_group"
+							@remove_group="remove_group"
 							@volumed="volumeChanged"
+							
+							@start_edit_title="start_edit_title"
+							@finish_edit_title="finish_edit_title"
+							
+							@group_title_edited="group_title_edited"
+							@group_color_edited="group_color_edited"
+							@add_group="add_group"
 							>
 								
 						</play-list>
@@ -108,7 +127,7 @@
 						<button id='new_sounder' @click="addSounder" title='Добавить...'><span>+</span></button>
 					</div>
 					-->
-					<div id='config' v-show="bConfigMode" >
+					<div id='config'  v-show="page=='Config'"  class='page'>
 						<h1>Настройки</h1>
 						<article>
 							<h2>Горячие клавиши</h2>

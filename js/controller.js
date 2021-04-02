@@ -10,7 +10,10 @@ var fCtrlIsPressed = false;
 function randd(min, max) {
   return Math.floor(arguments.length > 1 ? (max - min + 1) * Math.random() + min : (min + 1) * Math.random());
 };
-
+function shuffle(o){
+    for(var j, x, k = o.length; k; j = Math.floor(Math.random() * k), x = o[--k], o[k] = o[j], o[j] = x);
+    return o;
+};
 function guidGenerator() {
     var S4 = function() {
        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
@@ -344,6 +347,14 @@ Vue.component('playList', {
 			type: Boolean,
 			default: false
 		},
+		edit: {
+			type: Boolean,
+			default: false
+		},
+		group_opened: {
+			type: Boolean,
+			default: false
+		},
 		volume: {
 			type: Number,
 			default: 60
@@ -354,11 +365,15 @@ Vue.component('playList', {
 		},
 		list: {
 			type: Array
+		},
+		groups: {
+			type: Array
 		}
 	},
 	data: function(){
 		return {
-		
+			duration: 0,
+			currentTime: 0
 		};
 	},
 	computed: {
@@ -366,11 +381,14 @@ Vue.component('playList', {
 			if(this.id != undefined) {
 				return `pl_${this.id}`;
 			} else {
-				return `pl_${new Date().getTime()}`;
+				return `pl_${guidGenerator()}`;
 			}			
 		},
 		audio_id: function(){
 			return `a_${this._id}`;
+		},
+		progress_id: function(){
+			return `pr_${this._id}`;
 		},
 		cycle_id: function(){
 			return `cycle_${this._id}`;
@@ -378,23 +396,56 @@ Vue.component('playList', {
 		compact_id: function(){
 			return `compact_${this._id}`;
 		},
+		adder_id: function(){
+			return `add_${this._id}`;
+		},
+		groupper_id: function(){
+			return `gr_${this._id}`;
+		},
 		
 		audio_src: function(){
+			debugger;
 			return (this.list && this.tindex>-1)?this.list[this.tindex].path : "";
+		},
+		audio_looped: function(){
+			return this.loop;
 		},
 		_volume: function(){
 			let nVolume = this.volume;
-			/*if(nVolume<0) {
+			if(nVolume<0) {
 				nVolume=0;
 			}			
 			if(nVolume>100) {
 				nVolume=100;
 			}		
-			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			let oAudio = this.$el? this.$el.querySelector(`#a_${this._id}`) : false;
 			if(oAudio) {
 				oAudio.volume = nVolume/100;
-			}*/
+			}
 			return nVolume;			
+		},
+		
+		timeline_title: function(){
+			return `${this._convert_time(this.currentTime)}/${this._convert_time(this.duration)}`;
+		},
+		
+		_color: function(){
+			console.log('group', this.group );
+			console.dir(this.groups)
+			if(this.group && this.groups) {
+				let oGroup = this.groups.find(el=>el.id == this.group);
+				console.dir(oGroup);
+				return oGroup? oGroup.color : "";
+			} 
+			return "";
+		},
+		
+		_style: function(){
+			let o = {};
+			if(this._color) {
+				o['border-top-color'] = this._color;
+			}
+			return o;
 		}
 	},
 	methods: {		
@@ -402,6 +453,20 @@ Vue.component('playList', {
 			this.$emit('remove', oEvent);
 		},*/
 		
+		_convert_time_numbers(nNumber){
+			nNumber = ~~nNumber;
+			return (nNumber<10)? `0${nNumber}` : nNumber;
+		},
+		_convert_time: function(nSeconds){
+			if(nSeconds>60*60) {
+				return `${this._convert_time_numbers(nSeconds/(60*60))}:${this._convert_time_numbers(nSeconds/60)}:${this._convert_time_numbers(nSeconds%60)}`;
+			}
+			if(nSeconds>60) {
+				return `${this._convert_time_numbers(nSeconds/60)}:${this._convert_time_numbers(nSeconds%60)}`;
+			}
+			
+			return `00:${this._convert_time_numbers(nSeconds)}`;
+		},
 		onPlay: function(oEvent){
 			this.$emit('play', this.id);
 			
@@ -432,6 +497,67 @@ Vue.component('playList', {
 		},
 		onVolumed: function(oEvent){
 			this.$emit('volumed', this.id, oEvent);
+		},
+		onLooped: function(oEvent){
+			this.$emit('looped', this.id, oEvent);
+		},
+		onCompacted: function(oEvent){
+			this.$emit('compacted', this.id, oEvent);
+		},
+		
+		startTrack: function(nTrackIndex){
+			this.$emit('switch', this.id, nTrackIndex);
+		},
+		removeTrack: function(nTrackIndex){
+			this.$emit('remove_track', this.id, nTrackIndex);
+		},
+		addTracks: function(oEvent){
+			this.$emit('add_track', oEvent);
+		},
+		
+		test: function(){
+			debugger;			
+		},
+		
+		editTitle: function(){
+			this.$emit('start_edit_title', this.id);
+		},
+		onTitleEdited: function(oEvent){
+			this.$emit('finish_edit_title', this.id, oEvent.target.value);
+		},
+		
+		onGroup: function(){
+			this.$emit('group_configing', this.id);
+		},
+		setGroup: function(sGroupId){
+			this.$emit('set_group', this.id, sGroupId);
+		},
+		removeGroup: function(sGroupId){
+			this.$emit('remove_group', sGroupId);
+		},
+		
+		group_title_edited: function(sColor, sGroupId){
+			this.$emit('group_title_edited', sGroupId, sColor);
+		},
+		group_color_edited: function(sColor, sGroupId){
+			this.$emit('group_color_edited', sGroupId, sColor);
+		},
+		
+		addGroup: function(){
+			this.$emit('add_group');
+		},
+		
+		_timelineUpdate: function(){
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {
+				this.duration = oAudio.duration;
+				this.currentTime = oAudio.currentTime;
+				let playPercent = 100 * (this.currentTime / this.duration);
+				let oProgress = this.$el.querySelector(`#pr_${this._id}`);
+				if(oProgress) {
+					oProgress.style.width = `${~~playPercent}%`;
+				}		
+			}
 		}
 		
 	},
@@ -447,29 +573,32 @@ Vue.component('playList', {
 				}.bind(this);
 				
 				oAudio.addEventListener('loadeddata', function() {
+					debugger;
 					if(oAudio.readyState >= 2 && this.plaing) {
 						oAudio.play();
 					}
 				}.bind(this));
+				
+				oAudio.addEventListener("timeupdate", this._timelineUpdate, false);					 
 			}
 		}.bind(this), 100);
 		
 		
 	},
-	template: `<div class="player_form" :id="_id">
-		<audio :id="audio_id" :src="audio_src"></audio>
+	template: `<div class="player_form" :id="_id" :style="_style">
+		<audio :id="audio_id" :src="audio_src" :loop="audio_looped"></audio>
 		<div class="pf_lt">1 Q A Z</div>
 		<div class="pf_sett">
 			<div class="btns">
-				<input type="checkbox" :checked="loop" :id="cycle_id" class="btn cycle">
-				<label :for="cycle_id"><i class="fa fa-retweet"></i></label>
-				<button class="btn mix" @click="onRandom"><i class="fa fa-random"></i></button>
-				<input type="checkbox" :checked="compact" :id="compact_id" class="btn hide">
-				<label :for="compact_id"><i class="fa fa-eye-slash"></i></label>
+				<input type="checkbox" :checked="loop" :id="cycle_id" class="btn cycle" @change="onLooped">
+				<label :for="cycle_id" title='Зациклить 1 трек'><i class="fa fa-retweet"></i></label>
+				<button class="btn mix" @click="onRandom" title='Перемешать треки'><i class="fa fa-random"></i></button>
+				<input type="checkbox" :checked="compact" :id="compact_id" class="btn hide" @change="onCompacted">
+				<label :for="compact_id" title='Скрыть/показать треки'><i class="fa fa-eye-slash"></i></label>
 			</div>
 			<div class="vol">
 				<input type="range" orient="vertical" class="volume" min="0" max="100" :value="_volume" @change="onVolumed">
-				<div class="vol_num">{{volume}}</div>
+				<div class="vol_num">{{_volume}}</div>
 			</div>
 		</div>
 		<div class="pf_play" align="center">
@@ -477,17 +606,64 @@ Vue.component('playList', {
 			<button v-show="this.plaing" class="pf_play_bt" @click="onPause"> <i class="fa fa-pause"></i> </button> 
 			<button class="pf_next_bt" @click="onNext"> <i class="fa fa-play"></i><i class="fa fa-play"></i> </button>
 		</div>
-		<div class="pf_name">{{title}}</div>
+		<div class="pf_name"  @dblclick="editTitle">
+			<div v-show='!edit' @dblclick="editTitle" class='title'>{{title}}</div>
+			<div v-show='edit'><input :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'></div>
+			<div class="pf_trek_timeline" :title="timeline_title"><div class="pf_trek_playhead" :id='progress_id'></div></div>
+		</div>
 		<!--<div class="pf_img" style="display: block;">изображение</div>-->
-		<div class="pf_list" style="display: block;" v-show="!compact">
+		<div class="pf_list" style="display: block;" v-show="!compact && !group_opened">
 			<pl-track 
-				v-for="(track, i) in this.list"
+				v-for="(track, i) in this.list"				
 				:key="i"
 				:src="track.path"
 				:class="{active: i==tindex}"
+				v-on:dblclick.native="startTrack(i)"
+				@remove="removeTrack(i)"
 			/>
 		</div>
-		<!--<div class="pf_mng" style="display: block;">управление потоком</div>-->
+		<div class="pf_groups" style="display: block;" v-show="group_opened">
+			<pl-group 
+				v-for="(gr, i) in this.groups"				
+				:key="i"
+				:title="gr.title"
+				:color="gr.color"
+				:edit="gr.edit"
+				:class="{active: gr.id==group}"
+				@select="setGroup(gr.id)"
+				@remove="removeGroup(gr.id)"
+				
+				@title_edited="group_title_edited($event, gr.id)"
+				@color_edited="group_color_edited($event, gr.id)"
+			/>
+			<button class='addButton' title='Добавить группу' @click="addGroup"><i class="fa fa-plus"></i></button>
+		</div>
+		<div class="pf_mng" style="display: block;">
+			<input 
+				:id="adder_id" 
+				class="new_track" 
+				type="file" 
+				@change="addTracks" 
+				accept="audio/*"
+				multiple/>
+			<label 
+				:for="adder_id" 
+				class='ico_button'
+				title='Добавить треки'>
+					<i class="fa fa-plus"></i>
+			</label>
+			<input 
+				:id="groupper_id" 
+				:value="group_opened"
+				type="checkbox" 
+				@change="onGroup" />
+			<label 
+				:for="groupper_id" 
+				class='ico_button'
+				title='Настроить группу'>
+					<i class="fa fa-object-ungroup"></i>
+			</label>
+		</div>
 	</div>`
 });
 Vue.component('pl-track', {
@@ -518,8 +694,75 @@ Vue.component('pl-track', {
 	mounted: function(){
 		
 	},
-	template: `<div class="tr_line" data-url="http://youknowwho.ru/scripts/deviantplayer/music/nature/drops.mp3" data-num="2">
-		<div class="name" :title="title">{{title}}</div>
+	template: `<div class="tr_line">
+		<div class='content'>
+			<div class="name" :title="src">{{title}}</div>
+		</div>	
+		<button class='remove' @click="remove" title='Удалить из потока'><i class="fa fa-trash-alt"></i></button>
+	</div>`
+});
+Vue.component('pl-group', {
+	props: {
+		id: {
+			type: String,
+			default: ""
+		},
+		title: {
+			type: String,
+			default: ""
+		},
+		color: {
+			type: String,
+			default: ""
+		},
+		edit: {
+			type: Boolean,
+			default: false
+		}
+	},
+	data: function(){
+		return {
+		
+		};
+	},
+	computed: {
+	/*	title: function(){
+			if(this.src && this.src.length) {
+				return this.src.split("/").pop();
+			} 
+			return "";
+		}*/
+		
+		_color: function(){
+			debugger;
+			
+			return this.color;
+		}
+	},
+	methods: {		
+		remove: function(oEvent){
+			this.$emit('remove', oEvent);
+		},
+		onSelect: function(oEvent){
+			this.$emit('select', oEvent);
+		},
+		onTitleEdited: function(oEvent){
+			this.$emit('title_edited', oEvent.target.value);			
+		},
+		onColorEdited: function(oEvent){
+			this.$emit('color_edited', oEvent.target.value);			
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `<div class="pl_group">
+		<div class='content'>
+			<input type="color" :value="_color" @change="onColorEdited">
+			<div v-show='!edit' class="name" :title="title"  @click="onSelect">{{title}}</div>
+			<input v-show='edit' :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'>
+		</div>	
+		<button class='remove' @click="remove" title='Удалить группу'><i class="fa fa-trash-alt"></i></button>
 	</div>`
 });
 
@@ -536,14 +779,16 @@ Vue.component('pl-track', {
 					order: 0,
 					title: "тест",
 					color: "red",
-					group: "",
+					group: "embient",
 					img: "",
 					config: {
 						loop: false,
 						compact: false,
-						plaing: false
+						plaing: false,
+						edit: false,
+						group_opened: false
 					},
-					volume: 6,
+					volume: 50,
 					trackIndex: 0,
 					list: [
 						{
@@ -561,9 +806,10 @@ Vue.component('pl-track', {
 			
 			aPlayListGroups: [
 				{
-					title: "Эмбиент",
-					name: "embient",
-					color: "red"
+					id: "embient",
+					title: "",
+					color: "#ff0000",
+					edit: false
 				}
 			],
 			
@@ -571,7 +817,7 @@ Vue.component('pl-track', {
 			aIconNames: [
 				"ad","address-book","address-card","adjust","air-freshener","align-center","align-justify","align-left","align-right","allergies","ambulance","american-sign-language-interpreting","anchor","angle-double-down","angle-double-left","angle-double-right","angle-double-up","angle-down","angle-left","angle-right","angle-up","angry","ankh","apple-alt","archive","archway","arrow-alt-circle-down","arrow-alt-circle-left","arrow-alt-circle-right","arrow-alt-circle-up","arrow-circle-down","arrow-circle-left","arrow-circle-right","arrow-circle-up","arrow-down","arrow-left","arrow-right","arrow-up","arrows-alt","arrows-alt-h","arrows-alt-v","assistive-listening-systems","asterisk","at","atlas","atom","audio-description","award","baby","baby-carriage","backspace","backward","bacon","bahai","balance-scale","balance-scale-left","balance-scale-right","ban","band-aid","barcode","bars","baseball-ball","basketball-ball","bath","battery-empty","battery-full","battery-half","battery-quarter","battery-three-quarters","bed","beer","bell","bell-slash","bezier-curve","bible","bicycle","biking","binoculars","biohazard","birthday-cake","blender","blender-phone","blind","blog","bold","bolt","bomb","bone","bong","book","book-dead","book-medical","book-open","book-reader","bookmark","border-all","border-none","border-style","bowling-ball","box","box-open","boxes","braille","brain","bread-slice","briefcase","briefcase-medical","broadcast-tower","broom","brush","bug","building","bullhorn","bullseye","burn","bus","bus-alt","business-time","calculator","calendar","calendar-alt","calendar-check","calendar-day","calendar-minus","calendar-plus","calendar-times","calendar-week","camera","camera-retro","campground","candy-cane","cannabis","capsules","car","car-alt","car-battery","car-crash","car-side","caravan","caret-down","caret-left","caret-right","caret-square-down","caret-square-left","caret-square-right","caret-square-up","caret-up","carrot","cart-arrow-down","cart-plus","cash-register","cat","certificate","chair","chalkboard","chalkboard-teacher","charging-station","chart-area","chart-bar","chart-line","chart-pie","check","check-circle","check-double","check-square","cheese","chess","chess-bishop","chess-board","chess-king","chess-knight","chess-pawn","chess-queen","chess-rook","chevron-circle-down","chevron-circle-left","chevron-circle-right","chevron-circle-up","chevron-down","chevron-left","chevron-right","chevron-up","child","church","circle","circle-notch","city","clinic-medical","clipboard","clipboard-check","clipboard-list","clock","clone","closed-captioning","cloud","cloud-download-alt","cloud-meatball","cloud-moon","cloud-moon-rain","cloud-rain","cloud-showers-heavy","cloud-sun","cloud-sun-rain","cloud-upload-alt","cocktail","code","code-branch","coffee","cog","cogs","coins","columns","comment","comment-alt","comment-dollar","comment-dots","comment-medical","comment-slash","comments","comments-dollar","compact-disc","compass","compress","compress-alt","compress-arrows-alt","concierge-bell","cookie","cookie-bite","copy","copyright","couch","credit-card","crop","crop-alt","cross","crosshairs","crow","crown","crutch","cube","cubes","cut","database","deaf","democrat","desktop","dharmachakra","diagnoses","dice","dice-d20","dice-d6","dice-five","dice-four","dice-one","dice-six","dice-three","dice-two","digital-tachograph","directions","divide","dizzy","dna","dog","dollar-sign","dolly","dolly-flatbed","donate","door-closed","door-open","dot-circle","dove","download","drafting-compass","dragon","draw-polygon","drum","drum-steelpan","drumstick-bite","dumbbell","dumpster","dumpster-fire","dungeon","edit","egg","eject","ellipsis-h","ellipsis-v","envelope","envelope-open","envelope-open-text","envelope-square","equals","eraser","ethernet","euro-sign","exchange-alt","exclamation","exclamation-circle","exclamation-triangle","expand","expand-alt","expand-arrows-alt","external-link-alt","external-link-square-alt","eye","eye-dropper","eye-slash","fan","fast-backward","fast-forward","fax","feather","feather-alt","female","fighter-jet","file","file-alt","file-archive","file-audio","file-code","file-contract","file-csv","file-download","file-excel","file-export","file-image","file-import","file-invoice","file-invoice-dollar","file-medical","file-medical-alt","file-pdf","file-powerpoint","file-prescription","file-signature","file-upload","file-video","file-word","fill","fill-drip","film","filter","fingerprint","fire","fire-alt","fire-extinguisher","first-aid","fish","fist-raised","flag","flag-checkered","flag-usa","flask","flushed","folder","folder-minus","folder-open","folder-plus","font","football-ball","forward","frog","frown","frown-open","funnel-dollar","futbol","gamepad","gas-pump","gavel","gem","genderless","ghost","gift","gifts","glass-cheers","glass-martini","glass-martini-alt","glass-whiskey","glasses","globe","globe-africa","globe-americas","globe-asia","globe-europe","golf-ball","gopuram","graduation-cap","greater-than","greater-than-equal","grimace","grin","grin-alt","grin-beam","grin-beam-sweat","grin-hearts","grin-squint","grin-squint-tears","grin-stars","grin-tears","grin-tongue","grin-tongue-squint","grin-tongue-wink","grin-wink","grip-horizontal","grip-lines","grip-lines-vertical","grip-vertical","guitar","h-square","hamburger","hammer","hamsa","hand-holding","hand-holding-heart","hand-holding-usd","hand-lizard","hand-middle-finger","hand-paper","hand-peace","hand-point-down","hand-point-left","hand-point-right","hand-point-up","hand-pointer","hand-rock","hand-scissors","hand-spock","hands","hands-helping","handshake","hanukiah","hard-hat","hashtag","hat-cowboy","hat-cowboy-side","hat-wizard","hdd","heading","headphones","headphones-alt","headset","heart","heart-broken","heartbeat","helicopter","highlighter","hiking","hippo","history","hockey-puck","holly-berry","home","horse","horse-head","hospital","hospital-alt","hospital-symbol","hot-tub","hotdog","hotel","hourglass","hourglass-end","hourglass-half","hourglass-start","house-damage","hryvnia","i-cursor","ice-cream","icicles","icons","id-badge","id-card","id-card-alt","igloo","image","images","inbox","indent","industry","infinity","info","info-circle","italic","jedi","joint","journal-whills","kaaba","key","keyboard","khanda","kiss","kiss-beam","kiss-wink-heart","kiwi-bird","landmark","language","laptop","laptop-code","laptop-medical","laugh","laugh-beam","laugh-squint","laugh-wink","layer-group","leaf","lemon","less-than","less-than-equal","level-down-alt","level-up-alt","life-ring","lightbulb","link","lira-sign","list","list-alt","list-ol","list-ul","location-arrow","lock","lock-open","long-arrow-alt-down","long-arrow-alt-left","long-arrow-alt-right","long-arrow-alt-up","low-vision","luggage-cart","magic","magnet","mail-bulk","male","map","map-marked","map-marked-alt","map-marker","map-marker-alt","map-pin","map-signs","marker","mars","mars-double","mars-stroke","mars-stroke-h","mars-stroke-v","mask","medal","medkit","meh","meh-blank","meh-rolling-eyes","memory","menorah","mercury","meteor","microchip","microphone","microphone-alt","microphone-alt-slash","microphone-slash","microscope","minus","minus-circle","minus-square","mitten","mobile","mobile-alt","money-bill","money-bill-alt","money-bill-wave","money-bill-wave-alt","money-check","money-check-alt","monument","moon","mortar-pestle","mosque","motorcycle","mountain","mouse","mouse-pointer","mug-hot","music","network-wired","neuter","newspaper","not-equal","notes-medical","object-group","object-ungroup","oil-can","om","otter","outdent","pager","paint-brush","paint-roller","palette","pallet","paper-plane","paperclip","parachute-box","paragraph","parking","passport","pastafarianism","paste","pause","pause-circle","paw","peace","pen","pen-alt","pen-fancy","pen-nib","pen-square","pencil-alt","pencil-ruler","people-carry","pepper-hot","percent","percentage","person-booth","phone","phone-alt","phone-slash","phone-square","phone-square-alt","phone-volume","photo-video","piggy-bank","pills","pizza-slice","place-of-worship","plane","plane-arrival","plane-departure","play","play-circle","plug","plus","plus-circle","plus-square","podcast","poll","poll-h","poo","poo-storm","poop","portrait","pound-sign","power-off","pray","praying-hands","prescription","prescription-bottle","prescription-bottle-alt","print","procedures","project-diagram","puzzle-piece","qrcode","question","question-circle","quidditch","quote-left","quote-right","quran","radiation","radiation-alt","rainbow","random","receipt","record-vinyl","recycle","redo","redo-alt","registered","remove-format","reply","reply-all","republican","restroom","retweet","ribbon","ring","road","robot","rocket","route","rss","rss-square","ruble-sign","ruler","ruler-combined","ruler-horizontal","ruler-vertical","running","rupee-sign","sad-cry","sad-tear","satellite","satellite-dish","save","school","screwdriver","scroll","sd-card","search","search-dollar","search-location","search-minus","search-plus","seedling","server","shapes","share","share-alt","share-alt-square","share-square","shekel-sign","shield-alt","ship","shipping-fast","shoe-prints","shopping-bag","shopping-basket","shopping-cart","shower","shuttle-van","sign","sign-in-alt","sign-language","sign-out-alt","signal","signature","sim-card","sitemap","skating","skiing","skiing-nordic","skull","skull-crossbones","slash","sleigh","sliders-h","smile","smile-beam","smile-wink","smog","smoking","smoking-ban","sms","snowboarding","snowflake","snowman","snowplow","socks","solar-panel","sort","sort-alpha-down","sort-alpha-down-alt","sort-alpha-up","sort-alpha-up-alt","sort-amount-down","sort-amount-down-alt","sort-amount-up","sort-amount-up-alt","sort-down","sort-numeric-down","sort-numeric-down-alt","sort-numeric-up","sort-numeric-up-alt","sort-up","spa","space-shuttle","spell-check","spider","spinner","splotch","spray-can","square","square-full","square-root-alt","stamp","star","star-and-crescent","star-half","star-half-alt","star-of-david","star-of-life","step-backward","step-forward","stethoscope","sticky-note","stop","stop-circle","stopwatch","store","store-alt","stream","street-view","strikethrough","stroopwafel","subscript","subway","suitcase","suitcase-rolling","sun","superscript","surprise","swatchbook","swimmer","swimming-pool","synagogue","sync","sync-alt","syringe","table","table-tennis","tablet","tablet-alt","tablets","tachometer-alt","tag","tags","tape","tasks","taxi","teeth","teeth-open","temperature-high","temperature-low","tenge","terminal","text-height","text-width","th","th-large","th-list","theater-masks","thermometer","thermometer-empty","thermometer-full","thermometer-half","thermometer-quarter","thermometer-three-quarters","thumbs-down","thumbs-up","thumbtack","ticket-alt","times","times-circle","tint","tint-slash","tired","toggle-off","toggle-on","toilet","toilet-paper","toolbox","tools","tooth","torah","torii-gate","tractor","trademark","traffic-light","trailer","train","tram","transgender","transgender-alt","trash","trash-alt","trash-restore","trash-restore-alt","tree","trophy","truck","truck-loading","truck-monster","truck-moving","truck-pickup","tshirt","tty","tv","umbrella","umbrella-beach","underline","undo","undo-alt","universal-access","university","unlink","unlock","unlock-alt","upload","user","user-alt","user-alt-slash","user-astronaut","user-check","user-circle","user-clock","user-cog","user-edit","user-friends","user-graduate","user-injured","user-lock","user-md","user-minus","user-ninja","user-nurse","user-plus","user-secret","user-shield","user-slash","user-tag","user-tie","user-times","users","users-cog","utensil-spoon","utensils","vector-square","venus","venus-double","venus-mars","vial","vials","video","video-slash","vihara","voicemail","volleyball-ball","volume-down","volume-mute","volume-off","volume-up","vote-yea","vr-cardboard","walking","wallet","warehouse","water","wave-square","weight","weight-hanging","wheelchair","wifi","wind","window-close","window-maximize","window-minimize","window-restore","wine-bottle","wine-glass","wine-glass-alt","won-sign","wrench","x-ray","yen-sign","yin-yang"
 			],
-			
+			page: "PlayLists",
 			bEditMode: false,
 			bConfigMode: false,
 			sAppView: "default", // square, panel
@@ -747,7 +993,27 @@ Vue.component('pl-track', {
 				debugger;
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
-					//oPlayList.config.plaing = false;
+					this.pause(sPlayListId);
+					oPlayList.trackIndex = -1;
+					setTimeout(function(){
+						oPlayList.list = shuffle(oPlayList.list);
+						oPlayList.trackIndex = 0;
+						this.play(sPlayListId);						
+					}.bind(this), 30);
+				}
+			},
+			compacted: function(sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.compact = !oPlayList.config.compact;
+				}
+			},
+			looped: function(sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.loop = !oPlayList.config.loop;
 				}
 			},
 			
@@ -755,11 +1021,46 @@ Vue.component('pl-track', {
 				debugger;
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
-					oPlayList.trackIndex = oPlayList.trackIndex+1;
-					if(oPlayList.trackIndex >= oPlayList.list.length) {
-						oPlayList.trackIndex = 0;
-					}
+					//if(!oPlayList.config.loop){
+						oPlayList.trackIndex = oPlayList.trackIndex+1;
+						if(oPlayList.trackIndex >= oPlayList.list.length) {
+							oPlayList.trackIndex = 0;
+						}
+					//}
 					this.play(sPlayListId);
+				}
+			},
+			switchTrack: function(sPlayListId, nTrackIndex){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.trackIndex = nTrackIndex;
+					this.play(sPlayListId);
+				}
+			},
+			_addTrack: function(oPlayList, sPath){
+				sPath = sPath.replace(/\\/g,"/");
+				if(/.(mp3)|(flac)|(wav)$/.test(sPath) && !oPlayList.list.find(el=>el.path==sPath)){					
+					oPlayList.list.push({
+						path: sPath
+					});
+				}
+			},
+			addTrack: function(oEvent, sPlayListId){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					for (const f of oEvent.target.files) {
+						this._addTrack(oPlayList, f.path);
+					}
+					//this._saveData();
+				}
+			},
+			removeTrack: function(sPlayListId, nTrackIndex){
+				debugger;
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.list.splice(nTrackIndex, 1);
 				}
 			},
 			volumeChanged: function(sPlayListId, oEvent){
@@ -770,6 +1071,65 @@ Vue.component('pl-track', {
 					oPlayList.volume = nValue;
 				}
 			},
+			
+			start_edit_title: function(sPlayListId){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.edit = true;
+				}
+			},
+			finish_edit_title: function(sPlayListId, sNewTitle){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.edit = false;			
+					oPlayList.title = sNewTitle;
+				}
+			},
+			
+			group_configing: function(sPlayListId,){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.group_opened = !oPlayList.config.group_opened;
+				}
+			},
+			set_group: function(sPlayListId, nGroupId){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {
+					oPlayList.config.group_opened = false;
+					oPlayList.group = nGroupId;
+				}
+			},
+			remove_group: function(sGroupId){
+				let oGroup = this.aPlayListGroups.find(el=>el.id==sGroupId);
+				if(oGroup) {
+					let nGroupIndex = this.aPlayListGroups.findIndex(el=>el.id==sGroupId);
+					this.aPlayListGroups.splice(nGroupIndex, 1);
+				}
+			},
+			
+			group_title_edited: function(sGroupId, sTitle){
+				debugger;
+				let oGroup = this.aPlayListGroups.find(el=>el.id==sGroupId);
+				if(oGroup) {
+					oGroup.title = sTitle;
+				}
+			},
+			group_color_edited: function(sGroupId, sColor){
+				debugger;
+				let oGroup = this.aPlayListGroups.find(el=>el.id==sGroupId);
+				if(oGroup) {
+					oGroup.color = sColor;
+				}
+			},
+			add_group: function(){
+				this.aPlayListGroups.push({					
+					id: guidGenerator(),
+					title: "",
+					color: "#ff0000",
+					edit: false
+				});
+			},
+			
 			_checkUpdates: async function(){
 				var sUrl = 'https://api.github.com/repos/Etignis/dPlayer/releases';
 				var response = await fetch(sUrl);
@@ -880,6 +1240,7 @@ Vue.component('pl-track', {
 				
 			},
 			
+			/*
 			deleteSound: function(oItem, oSound){
 				
 				let Collection = this.aSoundCollections.find(el=>el.id==oItem.id);
@@ -962,7 +1323,7 @@ Vue.component('pl-track', {
 				});
 				this._saveData();
 			},
-
+			*/
 			proxy: function(sMethod){
 				this[sMethod]();
 			},
@@ -972,7 +1333,7 @@ Vue.component('pl-track', {
 			toggleConfigMode: function(){
 				this.bConfigMode = !this.bConfigMode;
 			},
-			
+			/*
 			toDefaultView: function(){
 				this.sAppView = "default";	
 				this._saveData("sAppView");	
@@ -1022,7 +1383,7 @@ Vue.component('pl-track', {
 					this._saveData("oWin");	
 				}
 			},
-			
+			*/
 			setForeground: function(){
 				this.oWin.bForeground = !this.oWin.bForeground;
 				w.setAlwaysOnTop(this.oWin.bForeground);

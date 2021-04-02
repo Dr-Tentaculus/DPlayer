@@ -18,6 +18,12 @@ a{
 	color: @color;
 	cursor: pointer;
 }
+.cinput{
+	border-radius: @r-rad;
+	border: none;
+	background: @m-gray;
+	color: @l-gray;
+}
 #app{
 	height: 100vh;
 	display: flex;
@@ -32,7 +38,17 @@ a{
 		flex-grow: 9;
 		position: relative;
 	}
-
+	.page {
+		overflow: auto;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;		
+		
+		.scrollbars(5px, darken(@m-gray, 15%), @m-gray);
+	}
+	/*
 	&.default{
 		@size: 8rem;
 		
@@ -86,6 +102,7 @@ a{
 			min-width: 1rem;
 		}
 	}
+	*/
 }
 
 #toolbar{
