@@ -405,7 +405,7 @@ Vue.component('playList', {
 		
 		audio_src: function(){
 			debugger;
-			return (this.list && this.tindex>-1)?this.list[this.tindex].path : "";
+			return (this.list && this.list.length>0 && this.tindex>-1)?this.list[this.tindex].path : "";
 		},
 		audio_looped: function(){
 			return this.loop;
@@ -468,6 +468,9 @@ Vue.component('playList', {
 			return `00:${this._convert_time_numbers(nSeconds)}`;
 		},
 		onPlay: function(oEvent){
+			if(!this.list || !this.list.length) {
+				return false;
+			}
 			this.$emit('play', this.id);
 			
 			let oAudio = this.$el.querySelector(`#a_${this._id}`);
@@ -521,6 +524,11 @@ Vue.component('playList', {
 		
 		editTitle: function(){
 			this.$emit('start_edit_title', this.id);
+			let oInput = this.$el.querySelector('.title_input');
+			if(oInput) {
+				setTimeout(function(){oInput.focus()}, 30);
+			}
+			
 		},
 		onTitleEdited: function(oEvent){
 			this.$emit('finish_edit_title', this.id, oEvent.target.value);
@@ -565,7 +573,7 @@ Vue.component('playList', {
 		debugger;
 		console.dir(this.$el);
 		setTimeout(function(){
-			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			let oAudio = this.$el?this.$el.querySelector(`#a_${this._id}`) : null;
 			if(oAudio) {
 				 oAudio.onended = function(){
 						debugger;
@@ -606,9 +614,9 @@ Vue.component('playList', {
 			<button v-show="this.plaing" class="pf_play_bt" @click="onPause"> <i class="fa fa-pause"></i> </button> 
 			<button class="pf_next_bt" @click="onNext"> <i class="fa fa-play"></i><i class="fa fa-play"></i> </button>
 		</div>
-		<div class="pf_name"  @dblclick="editTitle">
+		<div class="pf_name" >
 			<div v-show='!edit' @dblclick="editTitle" class='title'>{{title}}</div>
-			<div v-show='edit'><input :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'></div>
+			<div v-show='edit'><input :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput title_input'></div>
 			<div class="pf_trek_timeline" :title="timeline_title"><div class="pf_trek_playhead" :id='progress_id'></div></div>
 		</div>
 		<!--<div class="pf_img" style="display: block;">изображение</div>-->
@@ -638,7 +646,7 @@ Vue.component('playList', {
 			/>
 			<button class='addButton' title='Добавить группу' @click="addGroup"><i class="fa fa-plus"></i></button>
 		</div>
-		<div class="pf_mng" style="display: block;">
+		<div class="pf_mng">
 			<input 
 				:id="adder_id" 
 				class="new_track" 
@@ -652,17 +660,8 @@ Vue.component('playList', {
 				title='Добавить треки'>
 					<i class="fa fa-plus"></i>
 			</label>
-			<input 
-				:id="groupper_id" 
-				:value="group_opened"
-				type="checkbox" 
-				@change="onGroup" />
-			<label 
-				:for="groupper_id" 
-				class='ico_button'
-				title='Настроить группу'>
-					<i class="fa fa-object-ungroup"></i>
-			</label>
+						
+			<button class='ico_button' title='Настроить группу' @click="onGroup" :class="{active: group_opened}"><i class="fa fa-object-ungroup"></i></button>
 		</div>
 	</div>`
 });
@@ -1127,6 +1126,28 @@ Vue.component('pl-group', {
 					title: "",
 					color: "#ff0000",
 					edit: false
+				});
+			},
+			
+			add_playlist: function(){
+				this.aPlayLists.push({
+					id: guidGenerator(),
+					order: this.aPlayLists.length,
+					title: "Плейлист",
+					color: "red",
+					group: "",
+					img: "",
+					config: {
+						loop: false,
+						compact: false,
+						plaing: false,
+						edit: false,
+						group_opened: false
+					},
+					volume: 50,
+					trackIndex: 0,
+					list: [						
+					]
 				});
 			},
 			

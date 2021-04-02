@@ -20,7 +20,7 @@
 #playLists{
 	display: flex;
 	flex-wrap: wrap;
-	align-items: flex-start;
+	align-items: stretch;
 
 }
 .player_form{
@@ -80,6 +80,10 @@
 		&:active{
 			color: @color-rev;			
 		}
+		
+		&.active{
+			color: @color-rev;
+		}
 	}
 
   .blank(){
@@ -106,7 +110,7 @@
         .btns, .vol{
             float: left;
             width: 50%;
-            height: 9em;
+            //height: 9em;
             text-align: center;
         }
         .btn{
@@ -328,6 +332,8 @@
     }
     .pf_mng{
         .blank();
+				display: flex;
+				align-items: stretch;
     }  
     
     ////
@@ -413,12 +419,41 @@
 	width: 100%;
 	display: inline-block;
 	padding: .3em;
-	margin: .3rem 0
+	margin: .3rem 0;
+	
+	transition: background .2s;
 	
 	&:hover{
 			background: @m-gray + #222;    
 	}
 	&:active{
+			background:  @m-gray;    
+	}
+}
+
+.add_playlist{
+	min-width: 5rem;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	
+	span{
+		.fr-convex;           
+		background: @d-gray + #111;
+		opacity: .6;
+		width: 100%;
+		display: inline-block;
+		padding: .8em;
+		margin: .3rem 0;
+		text-align: center;
+		transition: background .2s, opacity .2s;
+	}
+	
+	&:hover span{
+			background: @m-gray + #222;    
+			opacity: 1;
+	}
+	&:active span{
 			background:  @m-gray;    
 	}
 }

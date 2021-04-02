@@ -794,7 +794,7 @@ a {
 #playLists {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
 }
 .player_form {
   display: block;
@@ -913,6 +913,9 @@ a {
 .player_form .ico_button:active {
   color: #fc801c;
 }
+.player_form .ico_button.active {
+  color: #fc801c;
+}
 .player_form .pf_lt {
   /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
     -moz-border-radius: @rad1 @rad2 @rad3 @rad4;*/
@@ -998,7 +1001,6 @@ a {
 .player_form .pf_sett .vol {
   float: left;
   width: 50%;
-  height: 9em;
   text-align: center;
 }
 .player_form .pf_sett .btn {
@@ -1699,6 +1701,8 @@ a {
   padding: .2em;
   margin: .1em;
   cursor: default;
+  display: flex;
+  align-items: stretch;
 }
 .player_form .pl_group,
 .player_form .tr_line {
@@ -1807,11 +1811,69 @@ a {
   width: 100%;
   display: inline-block;
   padding: .3em;
+  margin: .3rem 0;
+  transition: background .2s;
 }
 .addButton:hover {
   background: #999999;
 }
 .addButton:active {
+  background: #777;
+}
+.add_playlist {
+  min-width: 5rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.add_playlist span {
+  /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
+    -moz-border-radius: @rad1 @rad2 @rad3 @rad4;*/
+  /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
+    -moz-border-radius: @rad1 @rad2 @rad3 @rad4;*/
+  border-radius: 3px 3px 3px 3px;
+  overflow: visible;
+  background: #fff;
+  border: 0px solid #d8d8d8;
+  border-top-width: 0px;
+  /*display: inline-block;*/
+  font-weight: bold;
+  padding: 0.7em;
+  margin: 0.3em;
+  border-width: 1px;
+  border-style: solid;
+  border-bottom-width: 2px;
+  text-decoration: none;
+  border-color: #555555;
+  color: #fff;
+  background: #666666;
+  box-shadow: 0 1px 0px 0px rgba(255, 255, 255, 0.2) inset;
+  cursor: pointer;
+  /*-webkit-transition: all @tm ease;
+       -moz-transition: all @tm ease;
+         -o-transition: all @tm ease;
+        -ms-transition: all @tm ease;*/
+  transition: all 0.3s ease;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background: #333333;
+  opacity: .6;
+  width: 100%;
+  display: inline-block;
+  padding: .8em;
+  margin: .3rem 0;
+  text-align: center;
+  transition: background .2s, opacity .2s;
+}
+.add_playlist:hover span {
+  background: #999999;
+  opacity: 1;
+}
+.add_playlist:active span {
   background: #777;
 }
 #top_panel {
