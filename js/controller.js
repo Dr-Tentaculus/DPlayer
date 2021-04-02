@@ -595,7 +595,7 @@ Vue.component('playList', {
 	},
 	template: `<div class="player_form" :id="_id" :style="_style">
 		<audio :id="audio_id" :src="audio_src" :loop="audio_looped"></audio>
-		<div class="pf_lt">1 Q A Z</div>
+		<!--<div class="pf_lt">1 Q A Z</div>-->
 		<div class="pf_sett">
 			<div class="btns">
 				<input type="checkbox" :checked="loop" :id="cycle_id" class="btn cycle" @change="onLooped">
