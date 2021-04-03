@@ -18,6 +18,12 @@ a{
 	color: @color;
 	cursor: pointer;
 }
+.cinput{
+	border-radius: @r-rad;
+	border: none;
+	background: @m-gray;
+	color: @l-gray;
+}
 #app{
 	height: 100vh;
 	display: flex;
@@ -32,7 +38,17 @@ a{
 		flex-grow: 9;
 		position: relative;
 	}
-
+	.page {
+		overflow: auto;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;		
+		
+		.scrollbars(5px, darken(@m-gray, 15%), @m-gray);
+	}
+	/*
 	&.default{
 		@size: 8rem;
 		
@@ -86,13 +102,15 @@ a{
 			min-width: 1rem;
 		}
 	}
+	*/
 }
 
 #toolbar{
 	.flexParent();
 	justify-content: space-between;
 	cursor: default;
-	padding: 0;
+	padding: 0;	
+  padding-bottom: 3px;
 	
 	background: darken(@d-gray, 5%);
 	flex-direction: row-reverse;
@@ -100,6 +118,10 @@ a{
 	.panel{
 		//.flexParent();
 	}
+}
+
+.spacer{
+	flex-grow: 99;
 }
 
 #edit,

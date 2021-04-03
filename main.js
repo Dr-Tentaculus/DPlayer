@@ -96,6 +96,7 @@ function setHotkeys(aKeys){
 	];
 	globalShortcut.unregisterAll();
 	//register 
+	/*
 	aNums.forEach((sNum)=>{
 		let sHotKey = aKeys.length>0?`${aKeys.join('+')}+${sNum}` : sNum;
 		//console.log('set hotkey '+sHotKey);
@@ -109,6 +110,7 @@ function setHotkeys(aKeys){
 			console.log(sHotKey+' registration failed')
 		}
 	});
+	*/
 }
 
 

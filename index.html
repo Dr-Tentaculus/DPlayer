@@ -12,6 +12,14 @@
 				<div id='toolbar'>
 					<div class='panel'>
 						<titem 
+							key="foreground"
+							title="Всегда на первом плане"
+							type="switch"
+							ico="fas fa-thumbtack"
+							:active="pages.Config"
+							@press="oWin.bForeground">
+						</titem>
+						<titem 
 							key="quite"
 							title="Закрыть вот это вот все"
 							type="button"
@@ -34,24 +42,61 @@
 				
 				
 				<div id='main'>
-					<div id='playLists'>
-						<play-list
-							v-for="playList in aPlayLists"
-							key="playList.id"
-							:id="playList.id"
-							:title="playList.title"
-							:img="playList.img"
-							:color="playList.color"
-							:group="playList.group"
-							:volume="playList.volume"
-							
-							>
-								<pl-track 
-									v-for="track in playList.list"
-									key="track.path"
-									:src="track.path"
-								/>
-						</play-list>
+					<div class='page' v-show="page=='PlayLists'" >
+						<div id='playLists' >
+							<play-list
+								v-for="playList in aPlayLists"
+								:key="playList.id"
+								:id="playList.id"
+								:title="playList.title"
+								:img="playList.img"
+								:color="playList.color"
+								:group="playList.group"
+								:groups="aPlayListGroups"
+								:volume="Number(playList.volume)"							
+								
+								:loop="playList.config.loop"
+								:compact="playList.config.compact"
+								:plaing="playList.config.plaing"
+								:edit="playList.config.edit"
+								:group_opened="playList.config.group_opened"
+								
+								:tindex="playList.trackIndex"
+								:list="playList.list"
+								
+								
+								@play="play"
+								@pause="pause"
+								@random="random"
+								@compacted="compacted"
+								@looped="looped"
+								@next="nextTrack"
+								@switch="switchTrack"
+								@remove_track="removeTrack"
+								@add_track="addTrack($event, playList.id)"
+								@group_configing="group_configing"
+								@set_group="set_group"
+								@remove_group="remove_group"
+								@volumed="volumeChanged"
+								
+								@start_edit_title="start_edit_title"
+								@finish_edit_title="finish_edit_title"
+								
+								@group_title_edited="group_title_edited"
+								@group_color_edited="group_color_edited"
+								@add_group="add_group"
+								
+								@remove="remove_playlist"
+								>
+									
+							</play-list>
+							<div class='add_playlist' @click="add_playlist" title="Добавить поток">
+								<span>
+									<i class="fa fa-plus"></i>
+								</span>
+							</div>
+						</div>
+						<button @click="start">Загрузить</button>
 					</div>
 				<!--
 					<div id="soundpad" v-show="!bEditMode && !bConfigMode">
@@ -100,7 +145,7 @@
 						<button id='new_sounder' @click="addSounder" title='Добавить...'><span>+</span></button>
 					</div>
 					-->
-					<div id='config' v-show="bConfigMode" >
+					<div id='config'  v-show="page=='Config'"  class='page'>
 						<h1>Настройки</h1>
 						<article>
 							<h2>Горячие клавиши</h2>
