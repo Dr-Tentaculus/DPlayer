@@ -12,6 +12,14 @@
 				<div id='toolbar'>
 					<div class='panel'>
 						<titem 
+							key="foreground"
+							title="Всегда на первом плане"
+							type="switch"
+							ico="fas fa-thumbtack"
+							:active="pages.Config"
+							@press="oWin.bForeground">
+						</titem>
+						<titem 
 							key="quite"
 							title="Закрыть вот это вот все"
 							type="button"
@@ -77,15 +85,21 @@
 								@group_title_edited="group_title_edited"
 								@group_color_edited="group_color_edited"
 								@add_group="add_group"
+								
+								@remove="remove_playlist"
 								>
 									
 							</play-list>
-							<div class='add_playlist' @click="add_playlist">
+							<div class='add_playlist' @click="add_playlist" title="Добавить поток">
+
 								<span>
 									<i class="fa fa-plus"></i>
 								</span>
 							</div>
 						</div>
+
+						<!-- <button @click="start">Загрузить</button> -->
+
 					</div>
 				<!--
 					<div id="soundpad" v-show="!bEditMode && !bConfigMode">

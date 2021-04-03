@@ -109,7 +109,8 @@ a{
 	.flexParent();
 	justify-content: space-between;
 	cursor: default;
-	padding: 0;
+	padding: 0;	
+  padding-bottom: 3px;
 	
 	background: darken(@d-gray, 5%);
 	flex-direction: row-reverse;
@@ -117,6 +118,10 @@ a{
 	.panel{
 		//.flexParent();
 	}
+}
+
+.spacer{
+	flex-grow: 99;
 }
 
 #edit,
