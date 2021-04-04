@@ -42,7 +42,7 @@
 				
 				
 				<div id='main'>
-					<div class='page' v-show="page=='PlayLists'" >
+					<div class='page flexParent' v-show="page=='PlayLists'" >
 						<div id='playLists' >
 							<play-list
 								v-for="playList in aPlayLists"
@@ -96,7 +96,19 @@
 								</span>
 							</div>
 						</div>
-						<button @click="start">Загрузить</button>
+						<!-- <button @click="start">Загрузить</button> -->
+						<div id="soundpad">
+							<sounder
+								v-for="item in aSoundCollections"
+								:key="item.id"
+								:id="item.id"
+								:title="item.title"
+								:items="item.items"
+								:ico="item.ico"
+							>
+							</sounder>
+						</div>
+						<button id='new_sounder' @click="addSounder"><i class="fa fa-plus"></i></button>
 					</div>
 				<!--
 					<div id="soundpad" v-show="!bEditMode && !bConfigMode">

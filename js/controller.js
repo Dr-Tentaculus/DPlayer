@@ -783,7 +783,14 @@ Vue.component('pl-group', {
     el: '#app',
     data: {
 			aSoundCollections: [
-				
+				{
+					id: "0",
+					title: "0",
+					ico: "",
+					items: [
+						
+					]
+				}
 			],
 			
 			aPlayLists: [
@@ -1029,6 +1036,8 @@ Vue.component('pl-group', {
 						
 						if (!this.db.DB.objectStoreNames.contains('PlayLists')) { // если хранилище "books" не существует
 							this.db.DB.createObjectStore('PlayLists', {keyPath: 'id'}); // создаем хранилище
+							this.db.DB.createObjectStore('PlayListGroups', {keyPath: 'id'}); // создаем хранилище
+							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); // создаем хранилище
 						}
 						
 						//resolve();
@@ -1092,7 +1101,9 @@ Vue.component('pl-group', {
 					setTimeout(function(){
 						oPlayList.list = shuffle(oPlayList.list);
 						oPlayList.trackIndex = 0;
-						this.play(sPlayListId);						
+						this.play(sPlayListId);		
+
+						this._updateCollection('PlayLists', oPlayList);
 					}.bind(this), 30);
 				}
 			},
@@ -1101,6 +1112,7 @@ Vue.component('pl-group', {
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.config.compact = !oPlayList.config.compact;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			looped: function(sPlayListId){
@@ -1108,6 +1120,7 @@ Vue.component('pl-group', {
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.config.loop = !oPlayList.config.loop;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			
@@ -1121,6 +1134,7 @@ Vue.component('pl-group', {
 							oPlayList.trackIndex = 0;
 						}
 					//}
+					this._updateCollection('PlayLists', oPlayList);
 					this.play(sPlayListId);
 				}
 			},
@@ -1130,6 +1144,7 @@ Vue.component('pl-group', {
 				if(oPlayList) {
 					oPlayList.trackIndex = nTrackIndex;
 					this.play(sPlayListId);
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			_addTrack: function(oPlayList, sPath){
@@ -1148,6 +1163,7 @@ Vue.component('pl-group', {
 						this._addTrack(oPlayList, f.path);
 					}
 					this._saveData();
+					this._updateCollection('PlayLists', oPlayList);					
 				}
 			},
 			removeTrack: function(sPlayListId, nTrackIndex){
@@ -1155,6 +1171,7 @@ Vue.component('pl-group', {
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.list.splice(nTrackIndex, 1);
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			volumeChanged: function(sPlayListId, oEvent){
@@ -1163,6 +1180,7 @@ Vue.component('pl-group', {
 				if(oPlayList) {					
 					let nValue = oEvent.target.value;
 					oPlayList.volume = nValue;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			
@@ -1177,6 +1195,7 @@ Vue.component('pl-group', {
 				if(oPlayList) {
 					oPlayList.config.edit = false;			
 					oPlayList.title = sNewTitle;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			
@@ -1191,6 +1210,7 @@ Vue.component('pl-group', {
 				if(oPlayList) {
 					oPlayList.config.group_opened = false;
 					oPlayList.group = nGroupId;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			remove_group: function(sGroupId){
@@ -1198,6 +1218,7 @@ Vue.component('pl-group', {
 				if(oGroup) {
 					let nGroupIndex = this.aPlayListGroups.findIndex(el=>el.id==sGroupId);
 					this.aPlayListGroups.splice(nGroupIndex, 1);
+					this._removeFromCollection('PlayListGroups', oGroup);
 				}
 			},
 			
@@ -1206,6 +1227,7 @@ Vue.component('pl-group', {
 				let oGroup = this.aPlayListGroups.find(el=>el.id==sGroupId);
 				if(oGroup) {
 					oGroup.title = sTitle;
+					this._updateCollection('PlayListGroups', oGroup);
 				}
 			},
 			group_color_edited: function(sGroupId, sColor){
@@ -1213,15 +1235,18 @@ Vue.component('pl-group', {
 				let oGroup = this.aPlayListGroups.find(el=>el.id==sGroupId);
 				if(oGroup) {
 					oGroup.color = sColor;
+					this._updateCollection('PlayListGroups', oGroup);
 				}
 			},
 			add_group: function(){
-				this.aPlayListGroups.push({					
+				let oGroup = {					
 					id: guidGenerator(),
 					title: "",
 					color: "#ff0000",
 					edit: false
-				});
+				};
+				this.aPlayListGroups.push(oGroup);
+				this._addToCollection('PlayListGroups', oGroup);
 			},
 			
 			_addToCollection(sName, oItem){
@@ -1235,6 +1260,46 @@ Vue.component('pl-group', {
 
 					request.onsuccess = function() { // (4)
 						console.log("Добавлено", request.result);
+						resolve();
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			_updateCollection(sName, oItem){ // 
+				return new Promise((resolve, reject) => {
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+			
+					let request = collection.put(oItem); // (3)
+
+					request.onsuccess = function() { // (4)
+						console.log("Обновлено", request.result);
+						resolve();
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			_removeFromCollection(sName, oItem){ // 
+				return new Promise((resolve, reject) => {
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+			
+					let request = collection.delete(oItem.id); // (3)
+
+					request.onsuccess = function() { // (4)
+						console.log("Обновлено", request.result);
 						resolve();
 					};
 
@@ -1291,10 +1356,12 @@ Vue.component('pl-group', {
 				
 			},
 			
-			remove_playlist: function(sId){
+			remove_playlist: function(sPlayListId){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				let oPlayListIndex = this.aPlayLists.findIndex(el=>el.id==sPlayListId);
 				if(oPlayListIndex>-1) {
-					this.aPlayListGroups.splice(oPlayListIndex, 1);
+					this.aPlayLists.splice(oPlayListIndex, 1);
+					this._removeFromCollection('PlayLists', oPlayList);
 				}
 			},
 			
@@ -1405,7 +1472,9 @@ Vue.component('pl-group', {
 				
 			},
 			
-			/*
+			////////////// SOUNDS
+			
+			
 			deleteSound: function(oItem, oSound){
 				
 				let Collection = this.aSoundCollections.find(el=>el.id==oItem.id);
@@ -1488,7 +1557,7 @@ Vue.component('pl-group', {
 				});
 				this._saveData();
 			},
-			*/
+			
 			proxy: function(sMethod){
 				this[sMethod]();
 			},
