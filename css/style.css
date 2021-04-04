@@ -373,9 +373,13 @@ a {
   justify-content: space-between;
   cursor: default;
   padding: 0;
+  padding-bottom: 3px;
   background: #151515;
   flex-direction: row-reverse;
   -webkit-app-region: drag;
+}
+.spacer {
+  flex-grow: 99;
 }
 #edit,
 #config,
@@ -1156,11 +1160,11 @@ a {
   flex-wrap: wrap;
   align-items: stretch;
   align-items: center;
-  margin: 1rem .3rem;
+  margin: 1rem .7rem;
   padding: .1em .3em;
   cursor: pointer;
   background: #3c3c3c;
-  flex-basis: 6rem;
+  flex-basis: 4rem;
   -webkit-app-region: no-drag;
 }
 #new_sounder:hover {
@@ -2229,7 +2233,7 @@ a {
   background: #777;
 }
 .add_playlist {
-  min-width: 5rem;
+  flex-basis: 12em;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -2271,9 +2275,12 @@ a {
   background: #333333;
   opacity: .6;
   width: 100%;
-  display: inline-block;
+  min-height: 9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: .8em;
-  margin: .3rem 0;
+  margin: .9rem 2rem;
   text-align: center;
   transition: background .2s, opacity .2s;
 }
