@@ -837,6 +837,10 @@ button.active {
   flex-direction: column;
   background: #212121;
   box-shadow: -6px 0 6px #191919;
+  transition: background .2s;
+}
+#soundpad_wrapper.editing {
+  background: #777;
 }
 #soundpad_wrapper #soundpad {
   flex-grow: 99;
@@ -850,6 +854,9 @@ button.active {
 }
 #soundpad_wrapper .cinput {
   padding: .3rem;
+}
+#soundpad_wrapper .sounder_title {
+  min-width: 100%;
 }
 #sound_editor {
   position: absolute;
@@ -1268,12 +1275,53 @@ button.active {
 .drag_drag {
   outline: 1ps solid red;
 }
+.sound_list {
+  max-height: 300px;
+}
+.sound_item {
+  display: flex;
+  color: #ddd;
+}
+.sound_item:nth-child(2n) {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sound_item:nth-child(2n+1) {
+  background: rgba(0, 0, 0, 0.1);
+}
+.sound_item .content {
+  display: flex;
+  flex-grow: 1;
+  color: #ddd;
+}
+.sound_item input {
+  width: 2rem;
+}
+.add_track_label {
+  margin: 1rem 0 .5rem;
+  color: #ddd;
+}
+.add_track {
+  display: flex;
+  width: 100%;
+  margin: 1rem 0;
+  padding: .3rem;
+}
+.add_track i {
+  margin: auto;
+}
+.sounder_settings_group {
+  margin: .5rem 0;
+  border-radius: 3px;
+  padding: .7rem;
+  border: 1px solid #777;
+}
 .ico_group {
   /*.fr-convex;           
 	background: @m-gray + #111;*/
+  margin: .5rem 0;
   border-radius: 3px;
   padding: .7rem;
-  border: 1px solid #222;
+  border: 1px solid #777;
 }
 .ico_group .content {
   display: flex;
@@ -2334,7 +2382,7 @@ button.active {
   padding-right: 0.5em;
   opacity: .8;
 }
-.fa-pause {
+.pf_play_bt .fa-pause {
   color: #fc801c;
 }
 .addButton {

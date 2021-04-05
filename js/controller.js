@@ -65,6 +65,10 @@ Vue.component('sounder', {
 			type: String,
 			default: ""
 		},
+		active: {
+			type: Boolean,
+			default: false
+		},
 		ico: {
 			type: String,
 			default: ""
@@ -92,21 +96,24 @@ Vue.component('sounder', {
 	},
 	methods: {		
 		getRandomSound: function(){
-			return this.items[randd(0, this.items.length-1)].src;
+			return (this.items && this.items.length>0)?this.items[randd(0, this.items.length-1)].src : "";
 		},
 		itemclick: function(oEvent){
 			//this.$emit('iclick', oEvent);
 			let sSound = this.getRandomSound();
 			console.log();
-			let player = document.querySelector("#"+this.audio_id);
-			player.src = sSound;
-			player.play();
+			if(sSound){
+				let player = document.querySelector("#"+this.audio_id);
+				player.src = sSound;
+				player.play();
+			}
+			this.$emit('press', oEvent);
 		}
 	},
 	mounted: function(){
 		
 	},
-	template: `<div :id="id" class="sounder" :data-text="title" :title="title" @click="itemclick">
+	template: `<div :id="id" class="{sounder: true, active: active}" :data-text="title" :title="title" @click="itemclick">
 	<div class='core'>
 		<span>{{title}}</span>
 		<i :class="full_ico"></i>
@@ -718,6 +725,51 @@ Vue.component('pl-track', {
 	</div>`
 });
 
+Vue.component('sound_item', {
+	props: {
+		src: {
+			type: String,
+			default: ""
+		},
+		number: {
+			type: Number,
+			default: 0
+		}
+	},
+	data: function(){
+		return {
+		
+		};
+	},
+	computed: {
+		title: function(){
+			if(this.src && this.src.length) {
+				return this.src.split("/").pop();
+			} 
+			return "title";
+		}
+	},
+	methods: {		
+		remove: function(oEvent){
+			this.$emit('remove', oEvent);
+		},
+		onNumberEdited: function(oEvent){
+			this.$emit('set_number', oEvent.tatget.value);
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `<div class="sound_item">
+		<div class='content'>
+			<input class='cinput' :value="number" @change="onNumberEdited">
+			<div class="name" :title="src">{{title}}</div>
+		</div>	
+		<button class='remove' @click="remove" title='Удалить'><i class="fa fa-trash-alt"></i></button>
+	</div>`
+
+});
+
 Vue.component('pl-group', {
 	props: {
 		id: {
@@ -783,7 +835,7 @@ Vue.component('pl-group', {
 	</div>`
 });
 
-Vue.component('icon-selector', {
+Vue.component('icon_selector', {
 	props: {
 		id: {
 			type: String,
@@ -828,6 +880,7 @@ Vue.component('icon-selector', {
 		<div class='content'>
 			<icon-item
 				v-for="icon in list"
+				:key="icon"
 				:active='icon == value'
 				:ico='icon'
 				@click="onSelect"
@@ -836,8 +889,10 @@ Vue.component('icon-selector', {
 			</icon-item>
 		</div>	
 	</div>`
+
 });
-Vue.component('icon-item', {
+
+Vue.component('icon_item', {
 	props: {		
 		ico: {
 			type: String,
@@ -871,6 +926,7 @@ Vue.component('icon-item', {
 				<i :class="_class"></i>
 			</button>
 		`
+	
 });
 
   var app = new Vue({
@@ -940,7 +996,24 @@ Vue.component('icon-item', {
 				editor: {
 					title: "",
 					ico: "",
-					items: "",
+					items: [
+						{
+							path: "",
+							number: 0
+						},
+						{
+							path: "",
+							number: 0
+						},
+						{
+							path: "",
+							number: 0
+						},
+						{
+							path: "",
+							number: 0
+						}
+					],
 					id: "",
 					ico_filter: ""
 				}
@@ -1087,9 +1160,7 @@ Vue.component('icon-item', {
 				return this.aSoundCollections.filter(el=>el.active).length>0;
 			},
 			
-			sound_icon_filter: function(sValue){
-				this.
-			}
+			
 		},
 		mounted: function() {			
 			this.start();
@@ -1588,8 +1659,22 @@ Vue.component('icon-item', {
 			},
 			
 			////////////// SOUNDS
+			sounder_press: function(sounder_id){
+				let oSounder = this.aSoundCollections.find(el=>el.id==sounder_id);
+				if(oSounder) {
+					if(this.sounder.edit) {
+						oSounder.active = true;
+					} else {
+						
+					}					
+				}
+			},
 			edit_sounds: function(){
 				this.sounder.edit = !this.sounder.edit;
+				
+				if(!this.sounder.edit) {
+					this.aSoundCollections.forEach(el=>{el.active=false});
+				}
 			},
 			sound_title_changed: function(){
 				
@@ -1600,7 +1685,12 @@ Vue.component('icon-item', {
 			add_sounds: function(){
 				
 			},
-			
+			sound_icon_filter :function(){
+				
+			},
+			onSounderIcoSelect: function(){
+				
+			},
 			deleteSound: function(oItem, oSound){
 				
 				let Collection = this.aSoundCollections.find(el=>el.id==oItem.id);

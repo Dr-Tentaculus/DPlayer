@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Звукарь</title>
+        <title>dPlayer</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link rel="stylesheet" type="text/css" href="css/style.css">
@@ -43,63 +43,65 @@
 				
 				<div id='main'>
 					<div class='page flexParent' v-show="page=='PlayLists'" >
-						<div id='playLists' >
-							<play-list
-								v-for="playList in aPlayLists"
-								:key="playList.id"
-								:id="playList.id"
-								:title="playList.title"
-								:img="playList.img"
-								:color="playList.color"
-								:group="playList.group"
-								:groups="aPlayListGroups"
-								:volume="Number(playList.volume)"							
-								
-								:loop="playList.config.loop"
-								:compact="playList.config.compact"
-								:plaing="playList.config.plaing"
-								:edit="playList.config.edit"
-								:group_opened="playList.config.group_opened"
-								
-								:tindex="playList.trackIndex"
-								:list="playList.list"
-								
-								
-								@play="play"
-								@pause="pause"
-								@random="random"
-								@compacted="compacted"
-								@looped="looped"
-								@next="nextTrack"
-								@switch="switchTrack"
-								@remove_track="removeTrack"
-								@add_track="addTrack($event, playList.id)"
-								@group_configing="group_configing"
-								@set_group="set_group"
-								@remove_group="remove_group"
-								@volumed="volumeChanged"
-								
-								@start_edit_title="start_edit_title"
-								@finish_edit_title="finish_edit_title"
-								
-								@group_title_edited="group_title_edited"
-								@group_color_edited="group_color_edited"
-								@add_group="add_group"
-								
-								@remove="remove_playlist"
-								>
+						<div style='flex-grow: 99'>
+							<div id='playLists' >
+								<play-list
+									v-for="playList in aPlayLists"
+									:key="playList.id"
+									:id="playList.id"
+									:title="playList.title"
+									:img="playList.img"
+									:color="playList.color"
+									:group="playList.group"
+									:groups="aPlayListGroups"
+									:volume="Number(playList.volume)"							
 									
-							</play-list>
-							<div class='add_playlist' @click="add_playlist" title="Добавить поток">
+									:loop="playList.config.loop"
+									:compact="playList.config.compact"
+									:plaing="playList.config.plaing"
+									:edit="playList.config.edit"
+									:group_opened="playList.config.group_opened"
+									
+									:tindex="playList.trackIndex"
+									:list="playList.list"
+									
+									
+									@play="play"
+									@pause="pause"
+									@random="random"
+									@compacted="compacted"
+									@looped="looped"
+									@next="nextTrack"
+									@switch="switchTrack"
+									@remove_track="removeTrack"
+									@add_track="addTrack($event, playList.id)"
+									@group_configing="group_configing"
+									@set_group="set_group"
+									@remove_group="remove_group"
+									@volumed="volumeChanged"
+									
+									@start_edit_title="start_edit_title"
+									@finish_edit_title="finish_edit_title"
+									
+									@group_title_edited="group_title_edited"
+									@group_color_edited="group_color_edited"
+									@add_group="add_group"
+									
+									@remove="remove_playlist"
+									>
+										
+								</play-list>
+								<div class='add_playlist' @click="add_playlist" title="Добавить поток">
 
-								<span>
-									<i class="fa fa-plus"></i>
-								</span>
+									<span>
+										<i class="fa fa-plus"></i>
+									</span>
+								</div>
 							</div>
 						</div>
 
 						<!-- <button @click="start">Загрузить</button> -->
-						<div id='soundpad_wrapper'>
+						<div id='soundpad_wrapper' :class="{editing: sounder.edit}">
 							<div id="soundpad">
 								<sounder
 									v-for="item in aSoundCollections"
@@ -109,43 +111,60 @@
 									:items="item.items"
 									:ico="item.ico"
 									:active="item.active"
+									@press="sounder_press(item.id)"
 								>
 								</sounder>
 								<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
 							</div>
 							<div id='soundpad_toolbar'>
-								<button :class='{obscured: true, active: sounder.edit && sounder_selected}' @click="edit_sounds" title='Редактировать звуки'>
+								<button :class='{obscured: true, active: sounder.edit}' @click="edit_sounds" title='Редактировать звуки'>
 									<i class="fa fa-edit"></i>
 								</button>
 							</div>
 							
-							<div id='sound_editor' v-show="sounder.edit">
+							<div id='sound_editor' v-show="sounder.edit && sounder_selected">
 								<input 
 									placeholder='Название' 
-									class='cinput' 
+									class='cinput sounder_title' 
 									:value="sounder.editor.title" 
 									@change="sound_title_changed">
 									
-								<icon-selector
-									:value="sounder.editor.ico" 
-									:list="aIconsFiltered" 
-									@filter="sound_icon_filter"
-									@select="sound_icon_choosed"
-								/>
+								<!-- <icon_selector -->
+									<!-- :value="sounder.editor.ico"  -->
+									<!-- :list="aIconsFiltered"  -->
+								<!-- /> -->
+								<div class="ico_group">
+									<div>
+										<input class='cinput' @change="sound_icon_filter">
+									</div>
+									<div class='content'>
+										<icon_item
+											v-for="icon in aIconsFiltered"
+											:key="icon"
+											:active='icon == sounder.editor.ico'
+											:ico='icon'
+											@click="onSounderIcoSelect"
+											/>
+									</div>
+								</div>
 								
-								<div>
-									<sound-item
-										v-for="sound in sounder.editor.items"
-										:key="sound.id"
-										:path="sound.path"
-										:number="sound.numver" />
+								<div class="sounder_settings_group">
+									<label class='add_track_label'>Файлы:</label>
+									<div class='sound_list'>
+										<sound_item
+											v-for="(sound, i) in sounder.editor.items"
+											:key="i"
+											:path="sound.path"
+											:number="sound.number" />
+									
+									</div>
 									<button  
+										class='add_track' 
 										@click="add_sounds" 
 										title="Добавить звуки">
 										<i class="fa fa-plus"></i>
 									</button>
 								</div>
-								
 							</div>
 							
 						</div>

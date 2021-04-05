@@ -5,6 +5,11 @@
 	flex-direction: column;
 	background: @sounder_back;
 	box-shadow: -6px 0 6px @shadow_color;
+	transition: background .2s;
+	&.editing{
+		background: @m-gray;
+	}
+	
 	#soundpad{
 		flex-grow: 99;
 	}
@@ -19,6 +24,10 @@
 	
 	.cinput{
 		padding: .3rem;
+		
+	}
+	.sounder_title{
+		min-width: 100%;
 	}
 }
 
@@ -35,6 +44,7 @@
 #soundpad{
 	overflow-y: auto;	
 	.scrollbars(.15rem, @m-gray, lighten(@d-gray, 10%));
+	
 }
 
 #soundpad{
@@ -55,7 +65,7 @@
 
 	.flexParent();
   align-items: center;
-	transition: transform .3s, background .3s;
+	transition: transform .3s, background .3s, color .3s;
     //display: flex;
     flex-direction: column;
 	 -webkit-app-region: no-drag;
@@ -77,6 +87,7 @@
 	}	
 	&:active{
 		background: darken(@m-gray, 10%);
+		color: @color-rev;
 		//transform: scale(1);
 	}
 	
@@ -274,4 +285,45 @@
 }
 .drag_drag{
 	outline: 1ps solid red;
+}
+
+.sound_list{
+	max-height: 300px;
+}
+.sound_item{
+	display: flex;
+	color: @l-gray;
+	&:nth-child(2n){
+				background: rgba(255,255,255, .1);  
+	}
+	&:nth-child(2n+1){
+			background: rgba(0,0,0, .1);  
+	}
+	.content{
+		display: flex;
+		flex-grow: 1;
+		color: @l-gray;
+	}
+	input{
+		width: 2rem;
+	}
+}
+.add_track_label{
+	margin: 1rem 0 .5rem;
+	color: @l-gray;
+}
+.add_track{
+	display: flex;
+	width :100%;
+	margin: 1rem 0;
+	padding: .3rem;
+	i{
+		margin: auto;
+	}
+}
+.sounder_settings_group{
+	margin: .5rem 0;
+	border-radius: @r-rad;
+	padding: .7rem;
+	border :1px solid @m-gray;
 }
