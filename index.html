@@ -99,17 +99,55 @@
 						</div>
 
 						<!-- <button @click="start">Загрузить</button> -->
-						<div id="soundpad">
-							<sounder
-								v-for="item in aSoundCollections"
-								:key="item.id"
-								:id="item.id"
-								:title="item.title"
-								:items="item.items"
-								:ico="item.ico"
-							>
-							</sounder>
-							<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
+						<div id='soundpad_wrapper'>
+							<div id="soundpad">
+								<sounder
+									v-for="item in aSoundCollections"
+									:key="item.id"
+									:id="item.id"
+									:title="item.title"
+									:items="item.items"
+									:ico="item.ico"
+									:active="item.active"
+								>
+								</sounder>
+								<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
+							</div>
+							<div id='soundpad_toolbar'>
+								<button :class='{obscured: true, active: sounder.edit && sounder_selected}' @click="edit_sounds" title='Редактировать звуки'>
+									<i class="fa fa-edit"></i>
+								</button>
+							</div>
+							
+							<div id='sound_editor' v-show="sounder.edit">
+								<input 
+									placeholder='Название' 
+									class='cinput' 
+									:value="sounder.editor.title" 
+									@change="sound_title_changed">
+									
+								<icon-selector
+									:value="sounder.editor.ico" 
+									:list="aIconsFiltered" 
+									@filter="sound_icon_filter"
+									@select="sound_icon_choosed"
+								/>
+								
+								<div>
+									<sound-item
+										v-for="sound in sounder.editor.items"
+										:key="sound.id"
+										:path="sound.path"
+										:number="sound.numver" />
+									<button  
+										@click="add_sounds" 
+										title="Добавить звуки">
+										<i class="fa fa-plus"></i>
+									</button>
+								</div>
+								
+							</div>
+							
 						</div>
 
 					</div>

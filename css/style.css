@@ -254,11 +254,70 @@ a {
   color: #487EC5;
   cursor: pointer;
 }
+button {
+  /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
+    -moz-border-radius: @rad1 @rad2 @rad3 @rad4;*/
+  /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
+    -moz-border-radius: @rad1 @rad2 @rad3 @rad4;*/
+  border-radius: 3px 3px 3px 3px;
+  overflow: visible;
+  background: #fff;
+  border: 0px solid #d8d8d8;
+  border-top-width: 0px;
+  /*display: inline-block;*/
+  font-weight: bold;
+  padding: 0.7em;
+  margin: 0.3em;
+  border-width: 1px;
+  border-style: solid;
+  border-bottom-width: 2px;
+  text-decoration: none;
+  border-color: #555555;
+  color: #fff;
+  background: #666666;
+  box-shadow: 0 1px 0px 0px rgba(255, 255, 255, 0.2) inset;
+  /*-webkit-transition: all @tm ease;
+       -moz-transition: all @tm ease;
+         -o-transition: all @tm ease;
+        -ms-transition: all @tm ease;*/
+  transition: all 0.3s ease;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  padding: .2em;
+  margin: .1em;
+  cursor: pointer;
+  transition: color .2s, background .2s, border .2s, opacity .2s;
+}
+button:hover {
+  background: #999999;
+}
+button:active {
+  background: #777;
+}
+button.obscured {
+  background: #333333;
+  opacity: .6;
+}
+button.obscured:hover {
+  background: #999999;
+  opacity: 1;
+}
+button.obscured:active {
+  background: #777;
+}
+button.active {
+  color: #fc801c;
+}
 .cinput {
   border-radius: 3px;
   border: none;
   background: #777;
   color: #ddd;
+  box-shadow: inset 0px 2px 2px 0px #191919;
 }
 #app {
   height: 100vh;
@@ -772,6 +831,35 @@ a {
 .drag_drag {
   outline: 1ps solid red;
 }
+#soundpad_wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #212121;
+  box-shadow: -6px 0 6px #191919;
+}
+#soundpad_wrapper #soundpad {
+  flex-grow: 99;
+}
+#soundpad_wrapper #soundpad_toolbar {
+  padding: .2rem;
+  display: flex;
+}
+#soundpad_wrapper #soundpad_toolbar button {
+  flex-grow: 1;
+}
+#soundpad_wrapper .cinput {
+  padding: .3rem;
+}
+#sound_editor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  padding: 1rem;
+  background: #212121;
+  box-shadow: -8px 0 10px #191919;
+}
 #soundpad {
   overflow-y: auto;
 }
@@ -809,6 +897,7 @@ a {
   justify-content: space-around;
   flex-wrap: wrap;
   align-items: stretch;
+  flex-direction: column;
   justify-content: start;
 }
 .sounder {
@@ -1164,7 +1253,7 @@ a {
   padding: .1em .3em;
   cursor: pointer;
   background: #3c3c3c;
-  flex-basis: 4rem;
+  flex-basis: 3rem;
   -webkit-app-region: no-drag;
 }
 #new_sounder:hover {
@@ -1178,6 +1267,69 @@ a {
 }
 .drag_drag {
   outline: 1ps solid red;
+}
+.ico_group {
+  /*.fr-convex;           
+	background: @m-gray + #111;*/
+  border-radius: 3px;
+  padding: .7rem;
+  border: 1px solid #222;
+}
+.ico_group .content {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow: auto;
+}
+.ico_group .content::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.ico_group .content::-webkit-scrollbar-thumb {
+  background: #515151;
+}
+.ico_group .content::-webkit-scrollbar-track {
+  background: #777;
+}
+.ico_group .content body {
+  scrollbar-face-color: #515151;
+  scrollbar-track-color: #777;
+}
+.ico_group .content::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.ico_group .content::-webkit-scrollbar-thumb {
+  background: #515151;
+}
+.ico_group .content::-webkit-scrollbar-track {
+  background: #777;
+}
+.ico_group .content body {
+  scrollbar-face-color: #515151;
+  scrollbar-track-color: #777;
+}
+.ico_group .ico_item {
+  flex-basis: 2rem;
+  height: 2rem;
+  flex-grow: 1;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  display: flex;
+}
+.ico_group .ico_item:hover {
+  background: #999999;
+}
+.ico_group .ico_item:active {
+  background: #777;
+}
+.ico_group .ico_item.active {
+  color: #fc801c;
+}
+.ico_group .ico_item i {
+  margin: auto;
 }
 .tracks {
   width: 100%;

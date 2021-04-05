@@ -18,11 +18,44 @@ a{
 	color: @color;
 	cursor: pointer;
 }
+
+button{
+	.fr-convex;
+	padding: .2em;
+	margin: .1em;
+	cursor: pointer;
+	transition: color .2s, background .2s, border .2s, opacity .2s;
+	
+	&:hover{
+			background: @m-gray + #222;    
+	}
+	&:active{
+			background:  @m-gray;    
+	}
+	
+	&.obscured {
+		background: @d-gray + #111;
+		opacity: .6;
+		&:hover{
+			background: @m-gray + #222;    
+			opacity: 1;
+		}
+		&:active{
+				background:  @m-gray;    
+		}
+	}
+	&.active {
+		color: @color-rev;
+	}
+}
+ 
+
 .cinput{
 	border-radius: @r-rad;
 	border: none;
 	background: @m-gray;
 	color: @l-gray;
+	box-shadow: inset 0px 2px 2px 0px @shadow_color;
 }
 #app{
 	height: 100vh;

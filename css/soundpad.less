@@ -1,4 +1,37 @@
 
+#soundpad_wrapper{
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: @sounder_back;
+	box-shadow: -6px 0 6px @shadow_color;
+	#soundpad{
+		flex-grow: 99;
+	}
+	#soundpad_toolbar{
+		padding: .2rem;
+    display: flex;
+		
+		button {
+			flex-grow: 1;
+		}
+	}
+	
+	.cinput{
+		padding: .3rem;
+	}
+}
+
+#sound_editor{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 100%;
+	padding: 1rem;
+	background: @sounder_back;
+	box-shadow: -8px 0 10px @shadow_color;
+}
+
 #soundpad{
 	overflow-y: auto;	
 	.scrollbars(.15rem, @m-gray, lighten(@d-gray, 10%));
@@ -6,6 +39,7 @@
 
 #soundpad{
 	.flexParent();
+	flex-direction: column;
 	justify-content: start;
 }
 .sounder{
@@ -221,7 +255,7 @@
 	padding: .1em .3em;
 	cursor: pointer;	
 	background: lighten(@d-gray, 10%);
-	@size: 4rem;
+	@size: 3rem;
 	flex-basis: @size;
 	 -webkit-app-region: no-drag;
 	&:hover{
