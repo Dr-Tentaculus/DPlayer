@@ -65,7 +65,7 @@
 
 	.flexParent();
   align-items: center;
-	transition: transform .3s, background .3s, color .3s;
+	transition: transform .3s, background .3s;
     //display: flex;
     flex-direction: column;
 	 -webkit-app-region: no-drag;
@@ -87,8 +87,10 @@
 	}	
 	&:active{
 		background: darken(@m-gray, 10%);
-		color: @color-rev;
 		//transform: scale(1);
+	}
+	&.active{
+		color: @color-rev;
 	}
 	
 	&:nth-child(-n+9){

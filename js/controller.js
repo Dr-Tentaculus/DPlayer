@@ -113,7 +113,7 @@ Vue.component('sounder', {
 	mounted: function(){
 		
 	},
-	template: `<div :id="id" class="{sounder: true, active: active}" :data-text="title" :title="title" @click="itemclick">
+	template: `<div :id="id" :class="{sounder: true, active: active}" :data-text="title" :title="title" @click="itemclick">
 	<div class='core'>
 		<span>{{title}}</span>
 		<i :class="full_ico"></i>
@@ -941,6 +941,15 @@ Vue.component('icon_item', {
 					items: [
 						
 					]
+				},
+				{
+					id: "1",
+					title: "2",
+					ico: "pause",
+					active: false,
+					items: [
+						
+					]
 				}
 			],
 			
@@ -1659,8 +1668,12 @@ Vue.component('icon_item', {
 			},
 			
 			////////////// SOUNDS
+			_uselect_sounds: function(){
+				
+			},
 			sounder_press: function(sounder_id){
 				let oSounder = this.aSoundCollections.find(el=>el.id==sounder_id);
+				this.aSoundCollections.forEach(el=>{el.active=false});
 				if(oSounder) {
 					if(this.sounder.edit) {
 						oSounder.active = true;

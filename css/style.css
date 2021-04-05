@@ -974,6 +974,9 @@ button.active {
 .sounder:active {
   background: #5e5e5e;
 }
+.sounder.active {
+  color: #fc801c;
+}
 .sounder:nth-child(-n+9) {
   position: relative;
 }
