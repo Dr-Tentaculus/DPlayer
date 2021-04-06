@@ -145,6 +145,12 @@ input[type=range] {
   flex-wrap: wrap;
   align-items: stretch;
 }
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: stretch;
+}
 .flexChild {
   flex-grow: 1;
 }
@@ -318,6 +324,9 @@ button.active {
   background: #777;
   color: #ddd;
   box-shadow: inset 0px 2px 2px 0px #191919;
+}
+.cinput::placeholder {
+  color: #cccccc;
 }
 #app {
   height: 100vh;
@@ -855,8 +864,12 @@ button.active {
 #soundpad_wrapper .cinput {
   padding: .3rem;
 }
-#soundpad_wrapper .sounder_title {
-  min-width: 100%;
+#soundpad_wrapper .sounder_ico_ex {
+  padding: .4rem;
+  color: #fc801c;
+  min-width: 2.2rem;
+  min-height: 2.1rem;
+  text-align: center;
 }
 #sound_editor {
   position: absolute;
@@ -1117,7 +1130,7 @@ button.active {
   flex-wrap: wrap;
   align-items: stretch;
   align-items: center;
-  margin: 0;
+  margin: 1rem 0 .5rem;
   padding: .1em;
   flex-grow: 1;
 }

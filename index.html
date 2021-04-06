@@ -123,11 +123,14 @@
 							</div>
 							
 							<div id='sound_editor' v-show="sounder.edit && sounder_selected">
-								<input 
-									placeholder='Название' 
-									class='cinput sounder_title' 
-									:value="sounder.editor.title" 
-									@change="sound_title_changed">
+								<div class='flexRow'>
+									<input 
+										placeholder='Название' 
+										class='cinput sounder_title' 
+										:value="sounder.editor.title" 
+										@change="sound_title_changed">
+									<span class='sounder_ico_ex'><i :class="sounder_editor_ico"></i></span>
+								</div>	
 									
 								<!-- <icon_selector -->
 									<!-- :value="sounder.editor.ico"  -->
@@ -135,7 +138,7 @@
 								<!-- /> -->
 								<div class="ico_group">
 									<div>
-										<input class='cinput' @change="sound_icon_filter">
+										<input class='cinput' :value="sounder.editor.ico" @keyup="sound_icon_filter">
 									</div>
 									<div class='content'>
 										<icon_item
@@ -143,7 +146,7 @@
 											:key="icon"
 											:active='icon == sounder.editor.ico'
 											:ico='icon'
-											@click="onSounderIcoSelect"
+											@select="onSounderIcoSelect"
 											/>
 									</div>
 								</div>
@@ -154,17 +157,28 @@
 										<sound_item
 											v-for="(sound, i) in sounder.editor.items"
 											:key="i"
-											:path="sound.path"
-											:number="sound.number" />
+											:src="sound.src"
+											:number="sound.number" 
+											@remove="onSounderTrackRemove(i)"
+											@set_number="onSounderTrackNumberEdited($event, i)"/>
 									
 									</div>
-									<button  
-										class='add_track' 
-										@click="add_sounds" 
-										title="Добавить звуки">
-										<i class="fa fa-plus"></i>
-									</button>
+									<!-- <button   -->
+										<!-- class='add_track'  -->
+										<!-- @click="add_sounds"  -->
+										<!-- title="Добавить звуки"> -->
+										<!-- <i class="fa fa-plus"></i> -->
+									<!-- </button> -->
+									<input 
+										id="sounder_add_track" 
+										class="new_sound" 
+										type="file" 
+										@change="addSound($event)" 
+										accept="audio/*"
+										multiple/>
+									<label for="sounder_add_track" title='Добавить файл'><i class="fa fa-plus"></i></label>
 								</div>
+								<button @click="remove_sounder"><i class="fa fa-trash-alt"></i> Удалить</button>
 							</div>
 							
 						</div>

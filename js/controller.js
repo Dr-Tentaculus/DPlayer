@@ -76,6 +76,10 @@ Vue.component('sounder', {
 		items: {
 			type: Array,
 			default: []
+		},
+		show_title: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data: function(){
@@ -115,7 +119,7 @@ Vue.component('sounder', {
 	},
 	template: `<div :id="id" :class="{sounder: true, active: active}" :data-text="title" :title="title" @click="itemclick">
 	<div class='core'>
-		<span>{{title}}</span>
+		<span v-show="show_title">{{title}}</span>
 		<i :class="full_ico"></i>
 		<audio :id="audio_id" :src="src" preload="auto"></audio>
 	</div>
@@ -733,7 +737,7 @@ Vue.component('sound_item', {
 		},
 		number: {
 			type: Number,
-			default: 0
+			default: 1
 		}
 	},
 	data: function(){
@@ -754,7 +758,7 @@ Vue.component('sound_item', {
 			this.$emit('remove', oEvent);
 		},
 		onNumberEdited: function(oEvent){
-			this.$emit('set_number', oEvent.tatget.value);
+			this.$emit('set_number', oEvent.target.value);
 		}
 	},
 	mounted: function(){
@@ -762,7 +766,7 @@ Vue.component('sound_item', {
 	},
 	template: `<div class="sound_item">
 		<div class='content'>
-			<input class='cinput' :value="number" @change="onNumberEdited">
+			<input class='cinput' :value="number" @change="onNumberEdited" type='number' min="0">
 			<div class="name" :title="src">{{title}}</div>
 		</div>	
 		<button class='remove' @click="remove" title='Удалить'><i class="fa fa-trash-alt"></i></button>
@@ -914,14 +918,17 @@ Vue.component('icon_item', {
 		}
 	},
 	methods: {		
-		
+		onSounderIcoSelect: function(){
+			this.$emit('select', this.ico);
+		}
 	},
 	mounted: function(){
 		
 	},
 	template: `
 			<button			
-				:class='{ico_item: true, active: active}'				
+				:class='{ico_item: true, active: active}'	
+				@click="onSounderIcoSelect"			
 				>
 				<i :class="_class"></i>
 			</button>
@@ -1007,19 +1014,19 @@ Vue.component('icon_item', {
 					ico: "",
 					items: [
 						{
-							path: "",
+							src: "",
 							number: 0
 						},
 						{
-							path: "",
+							src: "",
 							number: 0
 						},
 						{
-							path: "",
+							src: "",
 							number: 0
 						},
 						{
-							path: "",
+							src: "",
 							number: 0
 						}
 					],
@@ -1086,7 +1093,7 @@ Vue.component('icon_item', {
 
 		computed: {
 			aIconsFiltered: function(){
-				return this.sounder.editor.ico_filter? this.aIconNames.filter(el=>el==this.sounder.editor.ico_filter) : this.aIconNames;
+				return this.sounder.editor.ico_filter? this.aIconNames.filter(el=>el.includes(this.sounder.editor.ico_filter)) : this.aIconNames;
 			},
 			aToolbarItems: function(){
 				return [
@@ -1167,6 +1174,9 @@ Vue.component('icon_item', {
 			
 			sounder_selected: function(){
 				return this.aSoundCollections.filter(el=>el.active).length>0;
+			},
+			sounder_editor_ico: function(){
+				return this.sounder.editor.ico? `fa fa-${this.sounder.editor.ico}` : "";
 			},
 			
 			
@@ -1668,8 +1678,13 @@ Vue.component('icon_item', {
 			},
 			
 			////////////// SOUNDS
-			_uselect_sounds: function(){
+	
+			_setSoubderEditor: function(oData){
+				let oEditor = this.sounder.editor;
 				
+				for (let key in oEditor) {
+					oEditor[key] = oData[key];
+				}
 			},
 			sounder_press: function(sounder_id){
 				let oSounder = this.aSoundCollections.find(el=>el.id==sounder_id);
@@ -1677,32 +1692,54 @@ Vue.component('icon_item', {
 				if(oSounder) {
 					if(this.sounder.edit) {
 						oSounder.active = true;
+						this._setSoubderEditor(oSounder);
 					} else {
 						
 					}					
 				}
 			},
-			edit_sounds: function(){
-				this.sounder.edit = !this.sounder.edit;
+			edit_sounds: function(bEdit){
+				this.sounder.edit = bEdit || !this.sounder.edit;
 				
 				if(!this.sounder.edit) {
 					this.aSoundCollections.forEach(el=>{el.active=false});
 				}
 			},
-			sound_title_changed: function(){
-				
+			_updateSoundFromEditor: function(){
+				let oEditor = this.sounder.editor;
+				let oSounder = this.aSoundCollections.find(el=>el.id==oEditor.id);
+				if(oSounder) {
+					for (let key in oEditor) {
+						oSounder[key] = oEditor[key];
+					}
+				}
 			},
-			sound_icon_choosed: function(){
-				
+			onSounderTrackRemove: function(nIndex){
+				let oEditor = this.sounder.editor;
+				oEditor.items.splice(nIndex, 1);
+				this._updateSoundFromEditor();
 			},
-			add_sounds: function(){
-				
+			onSounderTrackNumberEdited: function(sNumber, nIndex){
+				let oEditor = this.sounder.editor;
+				oEditor.items[nIndex].number = Number(sNumber);
+				this._updateSoundFromEditor();
 			},
-			sound_icon_filter :function(){
-				
+			sound_title_changed: function(oEvent){
+				this.sounder.editor.title = oEvent.target.value;
+				this._updateSoundFromEditor();
 			},
-			onSounderIcoSelect: function(){
-				
+			sound_icon_filter: function(oEvent){
+				if(oEvent.target.value && oEvent.target.value.length>1) {
+					this.sounder.editor.ico_filter = oEvent.target.value;
+				} else {
+					this.sounder.editor.ico_filter = "";
+				}
+				this.sounder.editor.ico = oEvent.target.value;
+				this._updateSoundFromEditor();
+			},
+			onSounderIcoSelect: function(sIco){
+				this.sounder.editor.ico = sIco;
+				this._updateSoundFromEditor();
 			},
 			deleteSound: function(oItem, oSound){
 				
@@ -1721,11 +1758,13 @@ Vue.component('icon_item', {
 					});
 				}
 			},
-			addSound: function(oEvent, oItem) {
+			addSound: function(oEvent) {
+				let oItem = this.sounder.editor;
 				for (const f of oEvent.target.files) {
 					this._addSound(oItem, f.path);
 				}
-				this._saveData();
+				this._updateSoundFromEditor();
+				//this._saveData();
 			},
 			dropSound: function(oEvent, oItem){
 				let that = this;
@@ -1753,17 +1792,21 @@ Vue.component('icon_item', {
 				this.aSoundCollections.push({
 					title: "",
 					id: sNewId,
-					ico: "",
+					ico: this.aIconNames[randd(0, this.aIconNames.length)],
 					items: []
 				});
-				this._saveData();
-				this._initSortable();
+				
+				this.edit_sounds(true);
+				this.sounder_press(sNewId);
+				
+				//this._saveData();
+				//this._initSortable();
 			},
 			
-			remove_sounder: function(oSounder){
-				let sId = oSounder.id;
+			remove_sounder: function(){
+				let sId = this.sounder.editor.id;
 				this.aSoundCollections = this.aSoundCollections.filter(el=>el.id!=sId);
-				this._saveData();
+				//this._saveData();
 			},
 			
 			change_ico: function(sIco, oItem){
