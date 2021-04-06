@@ -1,11 +1,70 @@
 
+#soundpad_wrapper{
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	background: @sounder_back;
+	box-shadow: -6px 0 6px @shadow_color;
+	transition: background .2s;
+	&.editing{
+		background: @m-gray;
+	}
+	
+	#soundpad{
+		flex-grow: 99;
+	}
+	#soundpad_toolbar{
+		padding: .2rem;
+    display: flex;
+		
+		button {
+			flex-grow: 1;
+		}
+	}
+	
+	.cinput{
+		padding: .3rem;
+		
+	}
+	.sounder_title{
+		//min-width: 100%;
+	}
+	.sounder_ico_ex{
+		padding: .4rem;
+		color: @color-rev;
+		min-width: 2.2rem;
+		min-height: 2.1rem;
+		text-align: center;
+	}
+}
+
+.soundpad_container{
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+}
+
+#sound_editor{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 100%;
+	padding: 1rem;
+	z-index: 99;
+	background: @sounder_back;
+	box-shadow: -8px 0 10px @shadow_color;
+}
+
 #soundpad{
 	overflow-y: auto;	
 	.scrollbars(.15rem, @m-gray, lighten(@d-gray, 10%));
+	
 }
 
 #soundpad{
 	.flexParent();
+	flex-direction: column;
 	justify-content: start;
 }
 .sounder{
@@ -44,6 +103,9 @@
 	&:active{
 		background: darken(@m-gray, 10%);
 		//transform: scale(1);
+	}
+	&.active{
+		color: @color-rev;
 	}
 	
 	&:nth-child(-n+9){
@@ -160,7 +222,7 @@
 		.fr-convex();
 		.flexParent();
 		align-items: center;
-		margin: 0;
+		margin: 1rem 0 .5rem;
 		padding: .1em;
 		flex-grow: 1;
 		span{
@@ -217,13 +279,15 @@
 	.fr-convex();
 	.flexParent();
 	align-items: center;
-	margin: 1rem .3rem;
+	margin: 1rem auto;
 	padding: .1em .3em;
 	cursor: pointer;	
 	background: lighten(@d-gray, 10%);
-	@size: 6rem;
+	@size: 3rem;
 	flex-basis: @size;
-	 -webkit-app-region: no-drag;
+	min-width:@size;
+  max-width: @size;
+	-webkit-app-region: no-drag;
 	&:hover{
 		background: @m-gray;
 		//transform: scale(1.01);
@@ -240,4 +304,45 @@
 }
 .drag_drag{
 	outline: 1ps solid red;
+}
+
+.sound_list{
+	max-height: 300px;
+}
+.sound_item{
+	display: flex;
+	color: @l-gray;
+	&:nth-child(2n){
+				background: rgba(255,255,255, .1);  
+	}
+	&:nth-child(2n+1){
+			background: rgba(0,0,0, .1);  
+	}
+	.content{
+		display: flex;
+		flex-grow: 1;
+		color: @l-gray;
+	}
+	input{
+		width: 2rem;
+	}
+}
+.add_track_label{
+	margin: 1rem 0 .5rem;
+	color: @l-gray;
+}
+.add_track{
+	display: flex;
+	width :100%;
+	margin: 1rem 0;
+	padding: .3rem;
+	i{
+		margin: auto;
+	}
+}
+.sounder_settings_group{
+	margin: .5rem 0;
+	border-radius: @r-rad;
+	padding: .7rem;
+	border :1px solid @m-gray;
 }

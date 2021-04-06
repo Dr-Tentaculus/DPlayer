@@ -29,8 +29,10 @@ function createWindow () {
 	splash.loadFile('splash.html');
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 100,
-    height: 100,
+    width: 800,
+    height: 700,
+		minWidth: 450,
+		minHeight: 450,	
 		frame: false,
 		show: false, 
 		alwaysOnTop: false,

@@ -65,6 +65,10 @@ Vue.component('sounder', {
 			type: String,
 			default: ""
 		},
+		active: {
+			type: Boolean,
+			default: false
+		},
 		ico: {
 			type: String,
 			default: ""
@@ -72,6 +76,10 @@ Vue.component('sounder', {
 		items: {
 			type: Array,
 			default: []
+		},
+		show_title: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data: function(){
@@ -92,28 +100,32 @@ Vue.component('sounder', {
 	},
 	methods: {		
 		getRandomSound: function(){
-			return this.items[randd(0, this.items.length-1)].src;
+			return (this.items && this.items.length>0)?this.items[randd(0, this.items.length-1)].src : "";
 		},
 		itemclick: function(oEvent){
 			//this.$emit('iclick', oEvent);
 			let sSound = this.getRandomSound();
 			console.log();
-			let player = document.querySelector("#"+this.audio_id);
-			player.src = sSound;
-			player.play();
+			if(sSound){
+				let player = document.querySelector("#"+this.audio_id);
+				player.src = sSound;
+				player.play();
+			}
+			this.$emit('press', oEvent);
 		}
 	},
 	mounted: function(){
 		
 	},
-	template: `<div :id="id" class="sounder" :data-text="title" :title="title" @click="itemclick">
+	template: `<div :id="id" :class="{sounder: true, active: active}" :data-text="title" :title="title" @click="itemclick">
 	<div class='core'>
-		<span>{{title}}</span>
+		<span v-show="show_title">{{title}}</span>
 		<i :class="full_ico"></i>
 		<audio :id="audio_id" :src="src" preload="auto"></audio>
 	</div>
 </div>`
 });
+
 Vue.component('sounditem', {
 	props: {
 		src: {
@@ -143,6 +155,7 @@ Vue.component('sounditem', {
 		
 </div>`
 });
+
 Vue.component('titem', {
 	props: {
 		title: {
@@ -679,6 +692,7 @@ Vue.component('playList', {
 		</div>
 	</div>`
 });
+
 Vue.component('pl-track', {
 	props: {
 		src: {
@@ -714,6 +728,52 @@ Vue.component('pl-track', {
 		<button class='remove' @click="remove" title='Удалить из потока'><i class="fa fa-trash-alt"></i></button>
 	</div>`
 });
+
+Vue.component('sound_item', {
+	props: {
+		src: {
+			type: String,
+			default: ""
+		},
+		number: {
+			type: Number,
+			default: 1
+		}
+	},
+	data: function(){
+		return {
+		
+		};
+	},
+	computed: {
+		title: function(){
+			if(this.src && this.src.length) {
+				return this.src.split("/").pop();
+			} 
+			return "title";
+		}
+	},
+	methods: {		
+		remove: function(oEvent){
+			this.$emit('remove', oEvent);
+		},
+		onNumberEdited: function(oEvent){
+			this.$emit('set_number', oEvent.target.value);
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `<div class="sound_item">
+		<div class='content'>
+			<input class='cinput' :value="number" @change="onNumberEdited" type='number' min="0">
+			<div class="name" :title="src">{{title}}</div>
+		</div>	
+		<button class='remove' @click="remove" title='Удалить'><i class="fa fa-trash-alt"></i></button>
+	</div>`
+
+});
+
 Vue.component('pl-group', {
 	props: {
 		id: {
@@ -779,6 +839,103 @@ Vue.component('pl-group', {
 	</div>`
 });
 
+Vue.component('icon_selector', {
+	props: {
+		id: {
+			type: String,
+			default: ""
+		},
+		value: {
+			type: String,
+			default: ""
+		},
+		list: {
+			type: Array,
+			default: []
+		}
+	},
+	data: function(){
+		return {
+		
+		};
+	},
+	computed: {
+	
+	},
+	methods: {		
+		remove: function(oEvent){
+			this.$emit('remove', oEvent);
+		},
+		onSelect: function(oEvent){
+			this.$emit('select', oEvent);
+		},	
+		onFilter: function(oEvent){
+			let sValue = oEvent.target.value;
+			this.$emit('filter', sValue);
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `<div class="ico_group">
+		<div>
+			<input class='cinput' @change="onFilter">
+		</div>
+		<div class='content'>
+			<icon-item
+				v-for="icon in list"
+				:key="icon"
+				:active='icon == value'
+				:ico='icon'
+				@click="onSelect"
+				>
+				<i :class="{fa: true, }"></i>
+			</icon-item>
+		</div>	
+	</div>`
+
+});
+
+Vue.component('icon_item', {
+	props: {		
+		ico: {
+			type: String,
+			default: ""
+		},		
+		active: {
+			type: Boolean,
+			default: false
+		},
+	},
+	data: function(){
+		return {
+		
+		};
+	},
+	computed: {
+		_class: function(){
+			return `fa fa-${this.ico}`;			
+		}
+	},
+	methods: {		
+		onSounderIcoSelect: function(){
+			this.$emit('select', this.ico);
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `
+			<button			
+				:class='{ico_item: true, active: active}'	
+				@click="onSounderIcoSelect"			
+				>
+				<i :class="_class"></i>
+			</button>
+		`
+	
+});
+
   var app = new Vue({
     el: '#app',
     data: {
@@ -787,6 +944,16 @@ Vue.component('pl-group', {
 					id: "0",
 					title: "0",
 					ico: "",
+					active :false,
+					items: [
+						
+					]
+				},
+				{
+					id: "1",
+					title: "2",
+					ico: "pause",
+					active: false,
 					items: [
 						
 					]
@@ -797,9 +964,9 @@ Vue.component('pl-group', {
 				{
 					id: "1",
 					order: 0,
-					title: "тест",
-					color: "red",
-					group: "embient",
+					title: "Плейлист 1",
+					color: "",
+					group: "",
 					img: "",
 					config: {
 						loop: false,
@@ -811,7 +978,7 @@ Vue.component('pl-group', {
 					volume: 50,
 					trackIndex: 0,
 					list: [
-						{
+					/*	{
 							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/drops.mp3"
 						},
 						{
@@ -819,21 +986,20 @@ Vue.component('pl-group', {
 						},
 						{
 							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/forest.mp3"
-						},
+						},*/
 					]
 				}
 			],
 			
 			aPlayListGroups: [
-				{
-					id: "embient",
+			/*	{
+					id: "",
 					title: "",
 					color: "#ff0000",
 					edit: false
-				}
+				}*/
 			],
-			
-			
+						
 			aIconNames: [
 				"ad","address-book","address-card","adjust","air-freshener","align-center","align-justify","align-left","align-right","allergies","ambulance","american-sign-language-interpreting","anchor","angle-double-down","angle-double-left","angle-double-right","angle-double-up","angle-down","angle-left","angle-right","angle-up","angry","ankh","apple-alt","archive","archway","arrow-alt-circle-down","arrow-alt-circle-left","arrow-alt-circle-right","arrow-alt-circle-up","arrow-circle-down","arrow-circle-left","arrow-circle-right","arrow-circle-up","arrow-down","arrow-left","arrow-right","arrow-up","arrows-alt","arrows-alt-h","arrows-alt-v","assistive-listening-systems","asterisk","at","atlas","atom","audio-description","award","baby","baby-carriage","backspace","backward","bacon","bahai","balance-scale","balance-scale-left","balance-scale-right","ban","band-aid","barcode","bars","baseball-ball","basketball-ball","bath","battery-empty","battery-full","battery-half","battery-quarter","battery-three-quarters","bed","beer","bell","bell-slash","bezier-curve","bible","bicycle","biking","binoculars","biohazard","birthday-cake","blender","blender-phone","blind","blog","bold","bolt","bomb","bone","bong","book","book-dead","book-medical","book-open","book-reader","bookmark","border-all","border-none","border-style","bowling-ball","box","box-open","boxes","braille","brain","bread-slice","briefcase","briefcase-medical","broadcast-tower","broom","brush","bug","building","bullhorn","bullseye","burn","bus","bus-alt","business-time","calculator","calendar","calendar-alt","calendar-check","calendar-day","calendar-minus","calendar-plus","calendar-times","calendar-week","camera","camera-retro","campground","candy-cane","cannabis","capsules","car","car-alt","car-battery","car-crash","car-side","caravan","caret-down","caret-left","caret-right","caret-square-down","caret-square-left","caret-square-right","caret-square-up","caret-up","carrot","cart-arrow-down","cart-plus","cash-register","cat","certificate","chair","chalkboard","chalkboard-teacher","charging-station","chart-area","chart-bar","chart-line","chart-pie","check","check-circle","check-double","check-square","cheese","chess","chess-bishop","chess-board","chess-king","chess-knight","chess-pawn","chess-queen","chess-rook","chevron-circle-down","chevron-circle-left","chevron-circle-right","chevron-circle-up","chevron-down","chevron-left","chevron-right","chevron-up","child","church","circle","circle-notch","city","clinic-medical","clipboard","clipboard-check","clipboard-list","clock","clone","closed-captioning","cloud","cloud-download-alt","cloud-meatball","cloud-moon","cloud-moon-rain","cloud-rain","cloud-showers-heavy","cloud-sun","cloud-sun-rain","cloud-upload-alt","cocktail","code","code-branch","coffee","cog","cogs","coins","columns","comment","comment-alt","comment-dollar","comment-dots","comment-medical","comment-slash","comments","comments-dollar","compact-disc","compass","compress","compress-alt","compress-arrows-alt","concierge-bell","cookie","cookie-bite","copy","copyright","couch","credit-card","crop","crop-alt","cross","crosshairs","crow","crown","crutch","cube","cubes","cut","database","deaf","democrat","desktop","dharmachakra","diagnoses","dice","dice-d20","dice-d6","dice-five","dice-four","dice-one","dice-six","dice-three","dice-two","digital-tachograph","directions","divide","dizzy","dna","dog","dollar-sign","dolly","dolly-flatbed","donate","door-closed","door-open","dot-circle","dove","download","drafting-compass","dragon","draw-polygon","drum","drum-steelpan","drumstick-bite","dumbbell","dumpster","dumpster-fire","dungeon","edit","egg","eject","ellipsis-h","ellipsis-v","envelope","envelope-open","envelope-open-text","envelope-square","equals","eraser","ethernet","euro-sign","exchange-alt","exclamation","exclamation-circle","exclamation-triangle","expand","expand-alt","expand-arrows-alt","external-link-alt","external-link-square-alt","eye","eye-dropper","eye-slash","fan","fast-backward","fast-forward","fax","feather","feather-alt","female","fighter-jet","file","file-alt","file-archive","file-audio","file-code","file-contract","file-csv","file-download","file-excel","file-export","file-image","file-import","file-invoice","file-invoice-dollar","file-medical","file-medical-alt","file-pdf","file-powerpoint","file-prescription","file-signature","file-upload","file-video","file-word","fill","fill-drip","film","filter","fingerprint","fire","fire-alt","fire-extinguisher","first-aid","fish","fist-raised","flag","flag-checkered","flag-usa","flask","flushed","folder","folder-minus","folder-open","folder-plus","font","football-ball","forward","frog","frown","frown-open","funnel-dollar","futbol","gamepad","gas-pump","gavel","gem","genderless","ghost","gift","gifts","glass-cheers","glass-martini","glass-martini-alt","glass-whiskey","glasses","globe","globe-africa","globe-americas","globe-asia","globe-europe","golf-ball","gopuram","graduation-cap","greater-than","greater-than-equal","grimace","grin","grin-alt","grin-beam","grin-beam-sweat","grin-hearts","grin-squint","grin-squint-tears","grin-stars","grin-tears","grin-tongue","grin-tongue-squint","grin-tongue-wink","grin-wink","grip-horizontal","grip-lines","grip-lines-vertical","grip-vertical","guitar","h-square","hamburger","hammer","hamsa","hand-holding","hand-holding-heart","hand-holding-usd","hand-lizard","hand-middle-finger","hand-paper","hand-peace","hand-point-down","hand-point-left","hand-point-right","hand-point-up","hand-pointer","hand-rock","hand-scissors","hand-spock","hands","hands-helping","handshake","hanukiah","hard-hat","hashtag","hat-cowboy","hat-cowboy-side","hat-wizard","hdd","heading","headphones","headphones-alt","headset","heart","heart-broken","heartbeat","helicopter","highlighter","hiking","hippo","history","hockey-puck","holly-berry","home","horse","horse-head","hospital","hospital-alt","hospital-symbol","hot-tub","hotdog","hotel","hourglass","hourglass-end","hourglass-half","hourglass-start","house-damage","hryvnia","i-cursor","ice-cream","icicles","icons","id-badge","id-card","id-card-alt","igloo","image","images","inbox","indent","industry","infinity","info","info-circle","italic","jedi","joint","journal-whills","kaaba","key","keyboard","khanda","kiss","kiss-beam","kiss-wink-heart","kiwi-bird","landmark","language","laptop","laptop-code","laptop-medical","laugh","laugh-beam","laugh-squint","laugh-wink","layer-group","leaf","lemon","less-than","less-than-equal","level-down-alt","level-up-alt","life-ring","lightbulb","link","lira-sign","list","list-alt","list-ol","list-ul","location-arrow","lock","lock-open","long-arrow-alt-down","long-arrow-alt-left","long-arrow-alt-right","long-arrow-alt-up","low-vision","luggage-cart","magic","magnet","mail-bulk","male","map","map-marked","map-marked-alt","map-marker","map-marker-alt","map-pin","map-signs","marker","mars","mars-double","mars-stroke","mars-stroke-h","mars-stroke-v","mask","medal","medkit","meh","meh-blank","meh-rolling-eyes","memory","menorah","mercury","meteor","microchip","microphone","microphone-alt","microphone-alt-slash","microphone-slash","microscope","minus","minus-circle","minus-square","mitten","mobile","mobile-alt","money-bill","money-bill-alt","money-bill-wave","money-bill-wave-alt","money-check","money-check-alt","monument","moon","mortar-pestle","mosque","motorcycle","mountain","mouse","mouse-pointer","mug-hot","music","network-wired","neuter","newspaper","not-equal","notes-medical","object-group","object-ungroup","oil-can","om","otter","outdent","pager","paint-brush","paint-roller","palette","pallet","paper-plane","paperclip","parachute-box","paragraph","parking","passport","pastafarianism","paste","pause","pause-circle","paw","peace","pen","pen-alt","pen-fancy","pen-nib","pen-square","pencil-alt","pencil-ruler","people-carry","pepper-hot","percent","percentage","person-booth","phone","phone-alt","phone-slash","phone-square","phone-square-alt","phone-volume","photo-video","piggy-bank","pills","pizza-slice","place-of-worship","plane","plane-arrival","plane-departure","play","play-circle","plug","plus","plus-circle","plus-square","podcast","poll","poll-h","poo","poo-storm","poop","portrait","pound-sign","power-off","pray","praying-hands","prescription","prescription-bottle","prescription-bottle-alt","print","procedures","project-diagram","puzzle-piece","qrcode","question","question-circle","quidditch","quote-left","quote-right","quran","radiation","radiation-alt","rainbow","random","receipt","record-vinyl","recycle","redo","redo-alt","registered","remove-format","reply","reply-all","republican","restroom","retweet","ribbon","ring","road","robot","rocket","route","rss","rss-square","ruble-sign","ruler","ruler-combined","ruler-horizontal","ruler-vertical","running","rupee-sign","sad-cry","sad-tear","satellite","satellite-dish","save","school","screwdriver","scroll","sd-card","search","search-dollar","search-location","search-minus","search-plus","seedling","server","shapes","share","share-alt","share-alt-square","share-square","shekel-sign","shield-alt","ship","shipping-fast","shoe-prints","shopping-bag","shopping-basket","shopping-cart","shower","shuttle-van","sign","sign-in-alt","sign-language","sign-out-alt","signal","signature","sim-card","sitemap","skating","skiing","skiing-nordic","skull","skull-crossbones","slash","sleigh","sliders-h","smile","smile-beam","smile-wink","smog","smoking","smoking-ban","sms","snowboarding","snowflake","snowman","snowplow","socks","solar-panel","sort","sort-alpha-down","sort-alpha-down-alt","sort-alpha-up","sort-alpha-up-alt","sort-amount-down","sort-amount-down-alt","sort-amount-up","sort-amount-up-alt","sort-down","sort-numeric-down","sort-numeric-down-alt","sort-numeric-up","sort-numeric-up-alt","sort-up","spa","space-shuttle","spell-check","spider","spinner","splotch","spray-can","square","square-full","square-root-alt","stamp","star","star-and-crescent","star-half","star-half-alt","star-of-david","star-of-life","step-backward","step-forward","stethoscope","sticky-note","stop","stop-circle","stopwatch","store","store-alt","stream","street-view","strikethrough","stroopwafel","subscript","subway","suitcase","suitcase-rolling","sun","superscript","surprise","swatchbook","swimmer","swimming-pool","synagogue","sync","sync-alt","syringe","table","table-tennis","tablet","tablet-alt","tablets","tachometer-alt","tag","tags","tape","tasks","taxi","teeth","teeth-open","temperature-high","temperature-low","tenge","terminal","text-height","text-width","th","th-large","th-list","theater-masks","thermometer","thermometer-empty","thermometer-full","thermometer-half","thermometer-quarter","thermometer-three-quarters","thumbs-down","thumbs-up","thumbtack","ticket-alt","times","times-circle","tint","tint-slash","tired","toggle-off","toggle-on","toilet","toilet-paper","toolbox","tools","tooth","torah","torii-gate","tractor","trademark","traffic-light","trailer","train","tram","transgender","transgender-alt","trash","trash-alt","trash-restore","trash-restore-alt","tree","trophy","truck","truck-loading","truck-monster","truck-moving","truck-pickup","tshirt","tty","tv","umbrella","umbrella-beach","underline","undo","undo-alt","universal-access","university","unlink","unlock","unlock-alt","upload","user","user-alt","user-alt-slash","user-astronaut","user-check","user-circle","user-clock","user-cog","user-edit","user-friends","user-graduate","user-injured","user-lock","user-md","user-minus","user-ninja","user-nurse","user-plus","user-secret","user-shield","user-slash","user-tag","user-tie","user-times","users","users-cog","utensil-spoon","utensils","vector-square","venus","venus-double","venus-mars","vial","vials","video","video-slash","vihara","voicemail","volleyball-ball","volume-down","volume-mute","volume-off","volume-up","vote-yea","vr-cardboard","walking","wallet","warehouse","water","wave-square","weight","weight-hanging","wheelchair","wifi","wind","window-close","window-maximize","window-minimize","window-restore","wine-bottle","wine-glass","wine-glass-alt","won-sign","wrench","x-ray","yen-sign","yin-yang"
 			],
@@ -841,13 +1007,41 @@ Vue.component('pl-group', {
 			pages: {
 				Config: false,				
 			},
+			sounder: {
+				edit: false,
+				editor: {
+					title: "",
+					ico: "",
+					items: [
+						{
+							src: "",
+							number: 0
+						},
+						{
+							src: "",
+							number: 0
+						},
+						{
+							src: "",
+							number: 0
+						},
+						{
+							src: "",
+							number: 0
+						}
+					],
+					id: "",
+					ico_filter: ""
+				}
+			},
 			//bEditMode: false,
 			//bConfigMode: false,
+			bReady: false,
 			db: {
 				connection: null,
 				DB: null,
 				name: 'DP',
-				version: 1
+				version: 2
 			},
 			sAppView: "default", // square, panel
 			oWinSizes: {
@@ -899,6 +1093,9 @@ Vue.component('pl-group', {
     },
 
 		computed: {
+			aIconsFiltered: function(){
+				return this.sounder.editor.ico_filter? this.aIconNames.filter(el=>el.includes(this.sounder.editor.ico_filter)) : this.aIconNames;
+			},
 			aToolbarItems: function(){
 				return [
 				/*	{
@@ -974,13 +1171,23 @@ Vue.component('pl-group', {
 				}
 				
 				return "PlayLists";
-			}
+			},
+			
+			sounder_selected: function(){
+				return this.aSoundCollections.filter(el=>el.active).length>0;
+			},
+			sounder_editor_ico: function(){
+				return this.sounder.editor.ico? `fa fa-${this.sounder.editor.ico}` : "";
+			},
+			
+			
 		},
 		mounted: function() {			
 			this.start();
 			//this._initSortable();
 			//this._setHotkeys();
 			//this._checkUpdates();
+			
 
 			w.setSize(this.oWinSizes[this.sAppView].w,this.oWinSizes[this.sAppView].h);
 			if(this.oWin.pos.x !=0 || this.oWin.pos.y != 0){
@@ -1015,6 +1222,10 @@ Vue.component('pl-group', {
 				this._loadData();
 				this._startDB().then(()=>{
 					this._loadFromDB();
+					this.sounder.edit = false;
+					this.edit_sounds();
+				
+					setTimeout(()=>{this.bReady = true}, 20);
 				});
 			},
 			_startDB: function(){
@@ -1034,10 +1245,14 @@ Vue.component('pl-group', {
 								// обновить
 						}
 						
-						if (!this.db.DB.objectStoreNames.contains('PlayLists')) { // если хранилище "books" не существует
+						if (!this.db.DB.objectStoreNames.contains('PlayLists')) { // если хранилище не существует
 							this.db.DB.createObjectStore('PlayLists', {keyPath: 'id'}); // создаем хранилище
-							this.db.DB.createObjectStore('PlayListGroups', {keyPath: 'id'}); // создаем хранилище
-							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); // создаем хранилище
+						}
+						if (!this.db.DB.objectStoreNames.contains('PlayListGroups')) { 
+							this.db.DB.createObjectStore('PlayListGroups', {keyPath: 'id'}); 
+						}
+						if (!this.db.DB.objectStoreNames.contains('Sounds')) { 
+							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); 
 						}
 						
 						//resolve();
@@ -1071,6 +1286,14 @@ Vue.component('pl-group', {
 					let aPlayLists = await this._getCollection('PlayLists');
 					if(aPlayLists) {
 						this.aPlayLists = aPlayLists;
+					}				
+					let aPlayListGroups = await this._getCollection('PlayListGroups');
+					if(aPlayListGroups) {
+						this.aPlayListGroups = aPlayListGroups;
+					}				
+					let aSoundCollections = await this._getCollection('Sounds');
+					if(aSoundCollections) {
+						this.aSoundCollections = aSoundCollections;
 					}
 			},
 			_groupPause: function(sGroupId){
@@ -1084,12 +1307,14 @@ Vue.component('pl-group', {
 				if(oPlayList) {
 					this._groupPause(oPlayList.group);
 					oPlayList.config.plaing = true;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			pause: function(sPlayListId){
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.config.plaing = false;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			random: function(sPlayListId){
@@ -1473,8 +1698,70 @@ Vue.component('pl-group', {
 			},
 			
 			////////////// SOUNDS
-			
-			
+	
+			_setSoubderEditor: function(oData){
+				let oEditor = this.sounder.editor;
+				
+				for (let key in oEditor) {
+					oEditor[key] = oData[key];
+				}
+			},
+			sounder_press: function(sounder_id){
+				let oSounder = this.aSoundCollections.find(el=>el.id==sounder_id);
+				this.aSoundCollections.forEach(el=>{el.active=false});
+				if(oSounder) {
+					if(this.sounder.edit) {
+						oSounder.active = true;
+						this._setSoubderEditor(oSounder);
+					} else {
+						
+					}					
+				}
+			},
+			edit_sounds: function(bEdit){
+				this.sounder.edit = ((typeof bEdit === "boolean") && bEdit) || !this.sounder.edit;
+				
+				if(!this.sounder.edit) {
+					this.aSoundCollections.forEach(el=>{el.active=false});
+				}
+			},
+			_updateSoundFromEditor: function(){
+				let oEditor = this.sounder.editor;
+				let oSounder = this.aSoundCollections.find(el=>el.id==oEditor.id);
+				if(oSounder) {
+					for (let key in oEditor) {
+						oSounder[key] = oEditor[key];
+					}
+				}
+				this._updateCollection('Sounds', oSounder);
+			},
+			onSounderTrackRemove: function(nIndex){
+				let oEditor = this.sounder.editor;
+				oEditor.items.splice(nIndex, 1);
+				this._updateSoundFromEditor();
+			},
+			onSounderTrackNumberEdited: function(sNumber, nIndex){
+				let oEditor = this.sounder.editor;
+				oEditor.items[nIndex].number = Number(sNumber);
+				this._updateSoundFromEditor();
+			},
+			sound_title_changed: function(oEvent){
+				this.sounder.editor.title = oEvent.target.value;
+				this._updateSoundFromEditor();
+			},
+			sound_icon_filter: function(oEvent){
+				if(oEvent.target.value && oEvent.target.value.length>1) {
+					this.sounder.editor.ico_filter = oEvent.target.value;
+				} else {
+					this.sounder.editor.ico_filter = "";
+				}
+				this.sounder.editor.ico = oEvent.target.value;
+				this._updateSoundFromEditor();
+			},
+			onSounderIcoSelect: function(sIco){
+				this.sounder.editor.ico = sIco;
+				this._updateSoundFromEditor();
+			},
 			deleteSound: function(oItem, oSound){
 				
 				let Collection = this.aSoundCollections.find(el=>el.id==oItem.id);
@@ -1492,11 +1779,13 @@ Vue.component('pl-group', {
 					});
 				}
 			},
-			addSound: function(oEvent, oItem) {
+			addSound: function(oEvent) {
+				let oItem = this.sounder.editor;
 				for (const f of oEvent.target.files) {
 					this._addSound(oItem, f.path);
 				}
-				this._saveData();
+				this._updateSoundFromEditor();
+				//this._saveData();
 			},
 			dropSound: function(oEvent, oItem){
 				let that = this;
@@ -1521,20 +1810,27 @@ Vue.component('pl-group', {
 				if(this.aSoundCollections.find(el=>el.id==sNewId)) {
 					sNewId = guidGenerator();
 				}
-				this.aSoundCollections.push({
+				let oSounder = {
 					title: "",
 					id: sNewId,
-					ico: "",
+					ico: this.aIconNames[randd(0, this.aIconNames.length)],
 					items: []
-				});
-				this._saveData();
-				this._initSortable();
+				};
+				this.aSoundCollections.push(oSounder);
+				
+				this.edit_sounds(true);
+				this.sounder_press(sNewId);
+				this._addToCollection('Sounds', oSounder);
+				
+				//this._saveData();
+				//this._initSortable();
 			},
 			
-			remove_sounder: function(oSounder){
-				let sId = oSounder.id;
+			remove_sounder: function(){
+				let sId = this.sounder.editor.id;
 				this.aSoundCollections = this.aSoundCollections.filter(el=>el.id!=sId);
-				this._saveData();
+				//this._saveData();
+				this._removeFromCollection('Sounds', {id: sId});
 			},
 			
 			change_ico: function(sIco, oItem){

@@ -1,0 +1,40 @@
+.ico_group{
+	/*.fr-convex;           
+	background: @m-gray + #111;*/
+	margin: .5rem 0;
+	border-radius: @r-rad;
+	padding: .7rem;
+	border :1px solid @m-gray;
+	
+	.content{
+		display: flex;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+		
+		max-height: 300px;
+		overflow: auto;
+		.scrollbars(5px, darken(@m-gray, 15%), @m-gray);
+	}
+	.ico_item{
+		flex-basis: 2rem;
+		height: 2rem;
+    flex-grow: 1;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+		display: flex;
+		&:hover{
+			background: @m-gray + #222;    
+		}
+		&:active{
+				background:  @m-gray;    
+		}
+		&.active{
+			color: @color-rev;
+		}
+		
+		i{
+			margin: auto;
+		}
+	}
+}
