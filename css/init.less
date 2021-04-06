@@ -70,7 +70,7 @@ button{
 	background: @d-gray;
 	//-webkit-app-region: drag;
   counter-reset: tracks;
-	
+		
 	#main{
 		flex-grow: 9;
 		position: relative;
@@ -482,4 +482,16 @@ button{
 }
 .drag_drag{
 	outline: 1ps solid red;
+}
+
+.hidden{
+	opacity: 0;
+	transition: opacity .6s;
+}
+.ready{
+	opacity: 1;
+}
+
+[v-cloak] {
+  display: none;
 }

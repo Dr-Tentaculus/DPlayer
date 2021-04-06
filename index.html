@@ -9,7 +9,7 @@
     </head>
     <body>
 			<div id="app" :class="sAppView">
-				<div id='toolbar'>
+				<div id='toolbar' v-cloak>
 					<div class='panel'>
 						<titem 
 							key="foreground"
@@ -27,6 +27,7 @@
 							@press="quite">
 						</titem>
 					</div>
+					{{bReady}}
 					<div class='panel'>
 						<titem 
 							v-for="item in aToolbarItems"
@@ -41,7 +42,7 @@
 				</div>
 				
 				
-				<div id='main'>
+				<div id='main' v-cloak>
 					<div class='page flexParent' v-show="page=='PlayLists'" >
 						<div style='flex-grow: 99'>
 							<div id='playLists' >
@@ -102,24 +103,26 @@
 
 						<!-- <button @click="start">Загрузить</button> -->
 						<div id='soundpad_wrapper' :class="{editing: sounder.edit}">
-							<div id="soundpad">
-								<sounder
-									v-for="item in aSoundCollections"
-									:key="item.id"
-									:id="item.id"
-									:title="item.title"
-									:items="item.items"
-									:ico="item.ico"
-									:active="item.active"
-									@press="sounder_press(item.id)"
-								>
-								</sounder>
-								<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
-							</div>
-							<div id='soundpad_toolbar'>
-								<button :class='{obscured: true, active: sounder.edit}' @click="edit_sounds" title='Редактировать звуки'>
-									<i class="fa fa-edit"></i>
-								</button>
+							<div class='soundpad_container'>
+								<div id="soundpad">
+									<sounder
+										v-for="item in aSoundCollections"
+										:key="item.id"
+										:id="item.id"
+										:title="item.title"
+										:items="item.items"
+										:ico="item.ico"
+										:active="item.active"
+										@press="sounder_press(item.id)"
+									>
+									</sounder>
+									<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
+								</div>
+								<div id='soundpad_toolbar'>
+									<button :class='{obscured: true, active: sounder.edit}' @click="edit_sounds" title='Редактировать звуки'>
+										<i class="fa fa-edit"></i>
+									</button>
+								</div>
 							</div>
 							
 							<div id='sound_editor' v-show="sounder.edit && sounder_selected">
@@ -258,9 +261,17 @@
 				<!-- </pre> -->
 			
 				</div>
-				<div id='new_version' v-show="oMeta.bNewVersionAvailable">
+				
+				<div id='new_version' v-show="oMeta.bNewVersionAvailable" v-cloak>
 					{{sNewVersionText}} <a @click='openNewVersion'> новая версия {{oMeta.sLatestVersion}}</a> (Текущая версия: {{oMeta.sCurVersion}})
 				</div>
+				
+				<transition name="fade">
+					<div :class='{splash: true, hidden: false}' v-show="!bReady">
+						<div id='load'>				
+						</div>
+					</div>
+				</transition>
 			</div>
 
 

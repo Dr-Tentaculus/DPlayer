@@ -3,6 +3,7 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
 	background: @sounder_back;
 	box-shadow: -6px 0 6px @shadow_color;
 	transition: background .2s;
@@ -38,12 +39,19 @@
 	}
 }
 
+.soundpad_container{
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+}
+
 #sound_editor{
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	right: 100%;
 	padding: 1rem;
+	z-index: 99;
 	background: @sounder_back;
 	box-shadow: -8px 0 10px @shadow_color;
 }
@@ -271,14 +279,15 @@
 	.fr-convex();
 	.flexParent();
 	align-items: center;
-	margin: 1rem .7rem;
+	margin: 1rem auto;
 	padding: .1em .3em;
 	cursor: pointer;	
 	background: lighten(@d-gray, 10%);
 	@size: 3rem;
 	flex-basis: @size;
 	min-width:@size;
-	 -webkit-app-region: no-drag;
+  max-width: @size;
+	-webkit-app-region: no-drag;
 	&:hover{
 		background: @m-gray;
 		//transform: scale(1.01);

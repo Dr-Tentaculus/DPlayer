@@ -1036,6 +1036,7 @@ Vue.component('icon_item', {
 			},
 			//bEditMode: false,
 			//bConfigMode: false,
+			bReady: false,
 			db: {
 				connection: null,
 				DB: null,
@@ -1186,6 +1187,7 @@ Vue.component('icon_item', {
 			//this._initSortable();
 			//this._setHotkeys();
 			//this._checkUpdates();
+			
 
 			w.setSize(this.oWinSizes[this.sAppView].w,this.oWinSizes[this.sAppView].h);
 			if(this.oWin.pos.x !=0 || this.oWin.pos.y != 0){
@@ -1220,6 +1222,10 @@ Vue.component('icon_item', {
 				this._loadData();
 				this._startDB().then(()=>{
 					this._loadFromDB();
+					this.sounder.edit = false;
+					this.edit_sounds();
+				
+					setTimeout(()=>{this.bReady = true}, 20);
 				});
 			},
 			_startDB: function(){
@@ -1301,12 +1307,14 @@ Vue.component('icon_item', {
 				if(oPlayList) {
 					this._groupPause(oPlayList.group);
 					oPlayList.config.plaing = true;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			pause: function(sPlayListId){
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.config.plaing = false;
+					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
 			random: function(sPlayListId){
@@ -1711,7 +1719,7 @@ Vue.component('icon_item', {
 				}
 			},
 			edit_sounds: function(bEdit){
-				this.sounder.edit = bEdit || !this.sounder.edit;
+				this.sounder.edit = ((typeof bEdit === "boolean") && bEdit) || !this.sounder.edit;
 				
 				if(!this.sounder.edit) {
 					this.aSoundCollections.forEach(el=>{el.active=false});

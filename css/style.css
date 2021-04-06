@@ -840,10 +840,30 @@ button.active {
 .drag_drag {
   outline: 1ps solid red;
 }
+.hidden {
+  opacity: 0;
+  transition: opacity .6s;
+}
+.ready {
+  opacity: 1;
+}
+[v-cloak] {
+  display: none;
+}
+@media only screen and (max-width: 400px) {
+  #soundpad_wrapper,
+  #soundpad {
+    flex-direction: row;
+  }
+  #soundpad_wrapper {
+    box-shadow: 0px -6px 6px #191919;
+  }
+}
 #soundpad_wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   background: #212121;
   box-shadow: -6px 0 6px #191919;
   transition: background .2s;
@@ -871,12 +891,18 @@ button.active {
   min-height: 2.1rem;
   text-align: center;
 }
+.soundpad_container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 #sound_editor {
   position: absolute;
   top: 0;
   bottom: 0;
   right: 100%;
   padding: 1rem;
+  z-index: 99;
   background: #212121;
   box-shadow: -8px 0 10px #191919;
 }
@@ -1278,6 +1304,7 @@ button.active {
   background: #3c3c3c;
   flex-basis: 3rem;
   min-width: 3rem;
+  max-width: 3rem;
   -webkit-app-region: no-drag;
 }
 #new_sounder:hover {
@@ -2794,4 +2821,13 @@ button.active {
 #mw_pl_CancelButton.white,
 #mw_pl_OkButton.white {
   background: white;
+}
+@media only screen and (max-width: 400px) {
+  #soundpad_wrapper,
+  #soundpad {
+    flex-direction: row;
+  }
+  #soundpad_wrapper {
+    box-shadow: 0px -6px 6px #191919;
+  }
 }
