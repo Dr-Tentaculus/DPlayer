@@ -1298,7 +1298,7 @@ button.active {
   flex-wrap: wrap;
   align-items: stretch;
   align-items: center;
-  margin: 1rem .7rem;
+  margin: 1rem auto;
   padding: .1em .3em;
   cursor: pointer;
   background: #3c3c3c;

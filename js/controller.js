@@ -3,7 +3,7 @@ const fs = require('fs');
 let w = remote.getCurrentWindow();
 let Sortable = require ('sortablejs');
 
-const VERSION = '1.2'
+const VERSION = '1.1'
 
 var fCtrlIsPressed = false;
 
@@ -940,55 +940,55 @@ Vue.component('icon_item', {
     el: '#app',
     data: {
 			aSoundCollections: [
-				{
-					id: "0",
-					title: "0",
-					ico: "",
-					active :false,
-					items: [
+				// {
+					// id: "0",
+					// title: "0",
+					// ico: "",
+					// active :false,
+					// items: [
 						
-					]
-				},
-				{
-					id: "1",
-					title: "2",
-					ico: "pause",
-					active: false,
-					items: [
+					// ]
+				// },
+				// {
+					// id: "1",
+					// title: "2",
+					// ico: "pause",
+					// active: false,
+					// items: [
 						
-					]
-				}
+					// ]
+				// }
 			],
 			
 			aPlayLists: [
-				{
-					id: "1",
-					order: 0,
-					title: "Плейлист 1",
-					color: "",
-					group: "",
-					img: "",
-					config: {
-						loop: false,
-						compact: false,
-						plaing: false,
-						edit: false,
-						group_opened: false
-					},
-					volume: 50,
-					trackIndex: 0,
-					list: [
-					/*	{
-							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/drops.mp3"
-						},
-						{
-							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/river.mp3"
-						},
-						{
-							path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/forest.mp3"
-						},*/
-					]
-				}
+				// {
+					// id: "1",
+					// order: 0,
+					// title: "Плейлист 1",
+					// color: "",
+					// group: "",
+					// img: "",
+					// config: {
+						// loop: false,
+						// compact: false,
+						// plaing: false,
+						// edit: false,
+						// group_opened: false
+					// },
+					// volume: 50,
+					// trackIndex: 0,
+					// list: [
+						// {
+							// path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/drops.mp3"
+						// },
+						// {
+							// path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/river.mp3"
+						// },
+						// {
+							// path: "http://youknowwho.ru/scripts/deviantplayer/music/nature/forest.mp3"
+						// },
+					// ]
+				// }
 			],
 			
 			aPlayListGroups: [
@@ -1013,22 +1013,22 @@ Vue.component('icon_item', {
 					title: "",
 					ico: "",
 					items: [
-						{
-							src: "",
-							number: 0
-						},
-						{
-							src: "",
-							number: 0
-						},
-						{
-							src: "",
-							number: 0
-						},
-						{
-							src: "",
-							number: 0
-						}
+						// {
+							// src: "",
+							// number: 0
+						// },
+						// {
+							// src: "",
+							// number: 0
+						// },
+						// {
+							// src: "",
+							// number: 0
+						// },
+						// {
+							// src: "",
+							// number: 0
+						// }
 					],
 					id: "",
 					ico_filter: ""
@@ -1186,7 +1186,7 @@ Vue.component('icon_item', {
 			this.start();
 			//this._initSortable();
 			//this._setHotkeys();
-			//this._checkUpdates();
+			this._checkUpdates();
 			
 
 			w.setSize(this.oWinSizes[this.sAppView].w,this.oWinSizes[this.sAppView].h);
@@ -1294,6 +1294,10 @@ Vue.component('icon_item', {
 					let aSoundCollections = await this._getCollection('Sounds');
 					if(aSoundCollections) {
 						this.aSoundCollections = aSoundCollections;
+						this.aSoundCollections.forEach(oSounder=>{
+							oSounder.active = false;
+						});
+						this.sounder.edit = false;
 					}
 			},
 			_groupPause: function(sGroupId){
@@ -1590,8 +1594,8 @@ Vue.component('icon_item', {
 				}
 			},
 			
-			checkUpdates: async function(){
-				var sUrl = 'https://api.github.com/repos/Etignis/dPlayer/releases';
+			_checkUpdates: async function(){
+				var sUrl = 'https://api.github.com/repos/Dr-Tentaculus/DPlayer/releases';
 				var response = await fetch(sUrl);
 				let that = this;
 				if (response.ok) { // если HTTP-статус в диапазоне 200-299
@@ -1724,6 +1728,7 @@ Vue.component('icon_item', {
 				if(!this.sounder.edit) {
 					this.aSoundCollections.forEach(el=>{el.active=false});
 				}
+				
 			},
 			_updateSoundFromEditor: function(){
 				let oEditor = this.sounder.editor;
