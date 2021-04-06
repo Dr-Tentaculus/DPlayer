@@ -1040,7 +1040,7 @@ Vue.component('icon_item', {
 				connection: null,
 				DB: null,
 				name: 'DP',
-				version: 1
+				version: 2
 			},
 			sAppView: "default", // square, panel
 			oWinSizes: {
@@ -1239,10 +1239,14 @@ Vue.component('icon_item', {
 								// обновить
 						}
 						
-						if (!this.db.DB.objectStoreNames.contains('PlayLists')) { // если хранилище "books" не существует
+						if (!this.db.DB.objectStoreNames.contains('PlayLists')) { // если хранилище не существует
 							this.db.DB.createObjectStore('PlayLists', {keyPath: 'id'}); // создаем хранилище
-							this.db.DB.createObjectStore('PlayListGroups', {keyPath: 'id'}); // создаем хранилище
-							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); // создаем хранилище
+						}
+						if (!this.db.DB.objectStoreNames.contains('PlayListGroups')) { 
+							this.db.DB.createObjectStore('PlayListGroups', {keyPath: 'id'}); 
+						}
+						if (!this.db.DB.objectStoreNames.contains('Sounds')) { 
+							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); 
 						}
 						
 						//resolve();
@@ -1276,6 +1280,14 @@ Vue.component('icon_item', {
 					let aPlayLists = await this._getCollection('PlayLists');
 					if(aPlayLists) {
 						this.aPlayLists = aPlayLists;
+					}				
+					let aPlayListGroups = await this._getCollection('PlayListGroups');
+					if(aPlayListGroups) {
+						this.aPlayListGroups = aPlayListGroups;
+					}				
+					let aSoundCollections = await this._getCollection('Sounds');
+					if(aSoundCollections) {
+						this.aSoundCollections = aSoundCollections;
 					}
 			},
 			_groupPause: function(sGroupId){
@@ -1713,6 +1725,7 @@ Vue.component('icon_item', {
 						oSounder[key] = oEditor[key];
 					}
 				}
+				this._updateCollection('Sounds', oSounder);
 			},
 			onSounderTrackRemove: function(nIndex){
 				let oEditor = this.sounder.editor;
@@ -1789,15 +1802,17 @@ Vue.component('icon_item', {
 				if(this.aSoundCollections.find(el=>el.id==sNewId)) {
 					sNewId = guidGenerator();
 				}
-				this.aSoundCollections.push({
+				let oSounder = {
 					title: "",
 					id: sNewId,
 					ico: this.aIconNames[randd(0, this.aIconNames.length)],
 					items: []
-				});
+				};
+				this.aSoundCollections.push(oSounder);
 				
 				this.edit_sounds(true);
 				this.sounder_press(sNewId);
+				this._addToCollection('Sounds', oSounder);
 				
 				//this._saveData();
 				//this._initSortable();
@@ -1807,6 +1822,7 @@ Vue.component('icon_item', {
 				let sId = this.sounder.editor.id;
 				this.aSoundCollections = this.aSoundCollections.filter(el=>el.id!=sId);
 				//this._saveData();
+				this._removeFromCollection('Sounds', {id: sId});
 			},
 			
 			change_ico: function(sIco, oItem){

@@ -1277,6 +1277,7 @@ button.active {
   cursor: pointer;
   background: #3c3c3c;
   flex-basis: 3rem;
+  min-width: 3rem;
   -webkit-app-region: no-drag;
 }
 #new_sounder:hover {
