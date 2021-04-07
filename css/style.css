@@ -145,11 +145,19 @@ input[type=range] {
   flex-wrap: wrap;
   align-items: stretch;
 }
+.flexParent .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .flexRow {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   align-items: stretch;
+}
+.flexSpacer {
+  flex-grow: 1;
 }
 .flexChild {
   flex-grow: 1;
@@ -318,6 +326,9 @@ button.obscured:active {
 button.active {
   color: #fc801c;
 }
+.padding {
+  padding: 1rem;
+}
 .cinput {
   border-radius: 3px;
   border: none;
@@ -446,6 +457,11 @@ button.active {
   flex-direction: row-reverse;
   -webkit-app-region: drag;
 }
+#toolbar .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .spacer {
   flex-grow: 99;
 }
@@ -498,7 +514,7 @@ button.active {
   scrollbar-face-color: #777;
   scrollbar-track-color: #3c3c3c;
 }
-#new_version {
+.bottom_toolbar {
   color: #777;
   background: #151515;
   padding: 0.3rem;
@@ -536,6 +552,11 @@ button.active {
   cursor: default;
   padding: 0;
   justify-content: start;
+}
+#edit .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .toolbar_item {
   /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
@@ -902,16 +923,22 @@ button.active {
   bottom: 0;
   right: 100%;
   padding: 1rem;
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
   z-index: 99;
   background: #212121;
   box-shadow: -8px 0 10px #191919;
+}
+#sound_editor .sound_title .cinput {
+  flex-grow: 1;
 }
 #soundpad {
   overflow-y: auto;
 }
 #soundpad::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 #soundpad::-webkit-scrollbar-thumb {
   background: #777;
@@ -924,8 +951,8 @@ button.active {
   scrollbar-track-color: #3c3c3c;
 }
 #soundpad::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 #soundpad::-webkit-scrollbar-thumb {
   background: #777;
@@ -945,6 +972,11 @@ button.active {
   align-items: stretch;
   flex-direction: column;
   justify-content: start;
+}
+#soundpad .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .sounder {
   /*-webkit-border-radius: @rad1 @rad2 @rad3 @rad4;
@@ -982,6 +1014,7 @@ button.active {
   user-select: none;
   flex-grow: 1;
   padding: .1rem;
+  margin: .3rem auto;
   width: 4rem;
   height: 4rem;
   flex-basis: 4rem;
@@ -995,6 +1028,11 @@ button.active {
   transition: transform .3s, background .3s;
   flex-direction: column;
   -webkit-app-region: no-drag;
+}
+.sounder .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .sounder .core {
   display: flex;
@@ -1160,6 +1198,11 @@ button.active {
   padding: .1em;
   flex-grow: 1;
 }
+.new_sound + label .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .new_sound + label span {
   flex-grow: 1;
   flex-grow: 0;
@@ -1172,11 +1215,11 @@ button.active {
 }
 .sound_list {
   overflow-y: scroll;
-  max-height: 5rem;
+  max-height: 250px;
 }
 .sound_list::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 .sound_list::-webkit-scrollbar-thumb {
   background: #3c3c3c;
@@ -1189,8 +1232,8 @@ button.active {
   scrollbar-track-color: #777;
 }
 .sound_list::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 .sound_list::-webkit-scrollbar-thumb {
   background: #3c3c3c;
@@ -1253,6 +1296,11 @@ button.active {
   cursor: pointer;
   border-radius: 0 3px 3px 0;
 }
+.sounditem button .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .sounditem button:hover {
   background: #484848;
 }
@@ -1307,6 +1355,11 @@ button.active {
   max-width: 3rem;
   -webkit-app-region: no-drag;
 }
+#new_sounder .col.middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 #new_sounder:hover {
   background: #777;
 }
@@ -1318,9 +1371,6 @@ button.active {
 }
 .drag_drag {
   outline: 1ps solid red;
-}
-.sound_list {
-  max-height: 300px;
 }
 .sound_item {
   display: flex;
@@ -1338,7 +1388,7 @@ button.active {
   color: #ddd;
 }
 .sound_item input {
-  width: 2rem;
+  width: 3rem;
 }
 .add_track_label {
   margin: 1rem 0 .5rem;
@@ -1371,7 +1421,7 @@ button.active {
   display: flex;
   flex-wrap: wrap;
   margin-top: 1rem;
-  max-height: 300px;
+  max-height: 200px;
   overflow: auto;
 }
 .ico_group .content::-webkit-scrollbar {
@@ -2821,6 +2871,25 @@ button.active {
 #mw_pl_CancelButton.white,
 #mw_pl_OkButton.white {
   background: white;
+}
+.page {
+  color: #ddd;
+}
+.page > .content {
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 70rem;
+}
+.page article {
+  padding: 1rem;
+  margin: 1rem;
+  line-height: 1.6;
+  border-radius: 3px;
+  border: 1px solid #333333;
+}
+.page .flexParent article {
+  flex-basis: 30rem;
+  flex-grow: 1;
 }
 @media only screen and (max-width: 400px) {
   #soundpad_wrapper,

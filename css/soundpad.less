@@ -25,7 +25,6 @@
 	
 	.cinput{
 		padding: .3rem;
-		
 	}
 	.sounder_title{
 		//min-width: 100%;
@@ -51,14 +50,23 @@
 	bottom: 0;
 	right: 100%;
 	padding: 1rem;
+	width: 20rem;
+	display: flex;
+  flex-direction: column;
 	z-index: 99;
 	background: @sounder_back;
 	box-shadow: -8px 0 10px @shadow_color;
+	
+	.sound_title{
+		.cinput{
+			flex-grow: 1;
+		}
+	}
 }
 
 #soundpad{
 	overflow-y: auto;	
-	.scrollbars(.15rem, @m-gray, lighten(@d-gray, 10%));
+	.scrollbars(5px, @m-gray, lighten(@d-gray, 10%));
 	
 }
 
@@ -71,6 +79,7 @@
 	.fr-convex();
 	.flexChild();
 	padding: .1rem;
+	margin: .3rem auto;
 	@size: 4rem;	
 	width: @size;
 	height: @size;
@@ -242,9 +251,10 @@
 }
 .sound_list{
 	overflow-y: scroll;
-	max-height: 5rem;
+	//max-height: 5rem;
+	max-height: 250px;
 	
-	.scrollbars(.15rem, lighten(@d-gray, 10%), @m-gray);
+	.scrollbars(5px, lighten(@d-gray, 10%), @m-gray);
 }
 .sounditem{
 	display: flex;
@@ -306,9 +316,7 @@
 	outline: 1ps solid red;
 }
 
-.sound_list{
-	max-height: 300px;
-}
+
 .sound_item{
 	display: flex;
 	color: @l-gray;
@@ -324,7 +332,7 @@
 		color: @l-gray;
 	}
 	input{
-		width: 2rem;
+		width: 3rem;
 	}
 }
 .add_track_label{

@@ -228,12 +228,23 @@ input[type=range] {
     justify-content: space-around;
     flex-wrap: wrap;
     align-items: stretch;
+		
+		.col{
+			&.middle{
+				display: flex;
+			justify-content: center;
+			align-items: center;
+			}
+		}
 }
 .flexRow{
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: stretch;
+}
+.flexSpacer{	
+	flex-grow: 1;
 }
 .flexChild{
     flex-grow: 1;

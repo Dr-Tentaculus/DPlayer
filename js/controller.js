@@ -1005,7 +1005,8 @@ Vue.component('icon_item', {
 			],
 			//page: "PlayLists",
 			pages: {
-				Config: false,				
+				Config: false,	
+				Info: false,				
 			},
 			sounder: {
 				edit: false,
@@ -1066,9 +1067,21 @@ Vue.component('icon_item', {
 				bForeground: false
 			},
 			oHotkeys: {
-				"SHIFT": false,
-				"CTRL": false,
-				"ALT": false,
+				PlayLists: {
+					"SHIFT": false,
+					"CTRL": false,
+					"ALT": false,
+				},
+				Sounds: {
+					"SHIFT": false,
+					"CTRL": false,
+					"ALT": false,
+				},
+				oKeyPressed :{
+					"SHIFT": false,
+					"CTRL": false,
+					"ALT": false,
+				}
 			},
 			aLocalDataDebug: [],
 			bModalWinShow: false,
@@ -1109,12 +1122,21 @@ Vue.component('icon_item', {
 					},*/
 					{
 						type: "switch",
-						tumblr: "bConfigMode",
+						//tumblr: "bConfigMode",
 						id: "config",
 						title: "Настройки",
 						ico: "fas fa-cog",
 						action: "toggleConfigMode",
 						active: this.pages.Config
+					},
+					{
+						type: "switch",
+						//tumblr: "bConfigMode",
+						id: "info",
+						title: "Справка",
+						ico: "fas fa-info",
+						action: "toggleInfoMode",
+						active: this.pages.Info
 					},
 					/*{
 						type: "switch",
@@ -1180,12 +1202,19 @@ Vue.component('icon_item', {
 				return this.sounder.editor.ico? `fa fa-${this.sounder.editor.ico}` : "";
 			},
 			
+			show_help: function(){
+				if(this.bReady && this.aPlayListGroups.length ==0 && this.aPlayLists.length ==0 && this.aSoundCollections.length ==0) {
+					return true;
+				}
+				return false;
+			}
+			
 			
 		},
 		mounted: function() {			
 			this.start();
 			//this._initSortable();
-			//this._setHotkeys();
+			this._setHotkeys();
 			this._checkUpdates();
 			
 
@@ -1438,7 +1467,11 @@ Vue.component('icon_item', {
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
 					oPlayList.config.group_opened = false;
-					oPlayList.group = nGroupId;
+					if(oPlayList.group == nGroupId) {
+						oPlayList.group = "";
+					} else {
+						oPlayList.group = nGroupId;
+					}
 					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
@@ -1626,15 +1659,36 @@ Vue.component('icon_item', {
 			openNewVersion: function(){				
 				shell.openExternal(this.sNewVersionLink);
 			},
-			setHotkeys: function(){
-				this._registerHotkeys();
-				ipcRenderer.on('hotkey_press', (event, arg) => {
-					console.log(arg);
-					if(arg==="0") {
-						arg=10;
-					}
-					this._callSounder(arg);
-				})
+			_setHotkeys: function(){
+				//this._registerHotkeys();
+				// ipcRenderer.on('hotkey_press', (event, arg) => {
+					// console.log(arg);
+					// if(arg==="0") {
+						// arg=10;
+					// }
+					// this._callSounder(arg);
+				// })
+				document.onkeydown = function(e) {
+						if (e.ctrlKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.CTRL = true;
+						}
+						// if (e.ctrlKey || e.metaKey) {
+								// this.oHotkeys.oKeyPressed.SHIFT = true;
+						// }
+						// if (e.ctrlKey || e.metaKey) {
+								// this.oHotkeys.oKeyPressed.ALT = true;
+						// }
+				}.bind(this);
+				document.onkeyup = function(e) {
+						if (e.ctrlKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.CTRL = false;
+						}
+						if (e.key === "1") {
+								//e.preventDefault(); // present "Save Page" from getting triggered.
+
+								//alert("The shortcut was pressed");
+						}
+				}.bind(this);
 			},
 			
 			callSounder(nIndex){
@@ -1682,7 +1736,7 @@ Vue.component('icon_item', {
 					"sAppView",
 					"oWinSizes",
 					"oWin",
-					"oHotkeys"
+					//"oHotkeys"
 				];
 				let that = this;
 				
@@ -1708,6 +1762,9 @@ Vue.component('icon_item', {
 				
 				for (let key in oEditor) {
 					oEditor[key] = oData[key];
+				}
+				for( let i=0; i<oEditor.items.length; i++){
+					oEditor.items[i].number = oData.items[i].number || 1;
 				}
 			},
 			sounder_press: function(sounder_id){
@@ -1862,11 +1919,22 @@ Vue.component('icon_item', {
 			proxy: function(sMethod){
 				this[sMethod]();
 			},
-			toggleEditMode: function(){
-				this.bEditMode = !this.bEditMode;
+			// toggleEditMode: function(){
+				// this.bEditMode = !this.bEditMode;
+			// },
+			_switchPages: function(sPage){
+				for (let page in this.pages){
+					if(page != sPage) {
+						this.pages[page] = false;						
+					}
+				}
+				this.pages[sPage] = !this.pages[sPage];
 			},
 			toggleConfigMode: function(){
-				this.pages.Config = !this.pages.Config;
+				this._switchPages('Config');
+			},
+			toggleInfoMode: function(){
+				this._switchPages('Info');
 			},
 			/*
 			toDefaultView: function(){
@@ -1939,7 +2007,7 @@ Vue.component('icon_item', {
 				
 				ipcRenderer.send('hotkeys', aKeys);
 			},
-			setSoundHotkeyShift: function(){
+			/*setSoundHotkeyShift: function(){
 				this.oHotkeys.SHIFT = !this.oHotkeys.SHIFT;
 				this._registerHotkeys();
 				this._saveData("oHotkeys");	
@@ -1953,6 +2021,13 @@ Vue.component('icon_item', {
 				this.oHotkeys.ALT = !this.oHotkeys.ALT;	
 				this._registerHotkeys();
 				this._saveData("oHotkeys");				
+			},*/
+			
+			setPlayListsHotkey: function(){
+				
+			},
+			setSoundHotkey: function(){
+				
 			},
 			
 			quite: function(){

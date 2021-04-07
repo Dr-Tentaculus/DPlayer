@@ -27,17 +27,17 @@
 							@press="quite">
 						</titem>
 					</div>
-					<!-- <div class='panel'> -->
-						<!-- <titem  -->
-							<!-- v-for="item in aToolbarItems" -->
-							<!-- :key="item.id" -->
-							<!-- :title="item.title" -->
-							<!-- :type="item.type" -->
-							<!-- :active="item.active" -->
-							<!-- :ico="item.ico" -->
-							<!-- @press="proxy(item.action)"> -->
-						<!-- </titem> -->
-					<!-- </div> -->
+					<div class='panel'>
+						<titem 
+							v-for="item in aToolbarItems"
+							:key="item.id"
+							:title="item.title"
+							:type="item.type"
+							:active="item.active"
+							:ico="item.ico"
+							@press="proxy(item.action)">
+						</titem>
+					</div>
 				</div>
 				
 				
@@ -125,7 +125,7 @@
 							</div>
 							
 							<div id='sound_editor' v-show="sounder.edit && sounder_selected">
-								<div class='flexRow'>
+								<div class='flexRow sound_title'>
 									<input 
 										placeholder='Название' 
 										class='cinput sounder_title' 
@@ -139,7 +139,7 @@
 									<!-- :list="aIconsFiltered"  -->
 								<!-- /> -->
 								<div class="ico_group">
-									<div>
+									<div class="flexRow">
 										<input class='cinput' :value="sounder.editor.ico" @keyup="sound_icon_filter">
 									</div>
 									<div class='content'>
@@ -180,6 +180,9 @@
 										multiple/>
 									<label for="sounder_add_track" title='Добавить файл'><i class="fa fa-plus"></i></label>
 								</div>
+								
+								<div class='flexSpacer'></div>
+								
 								<button @click="remove_sounder"><i class="fa fa-trash-alt"></i> Удалить</button>
 							</div>
 							
@@ -233,27 +236,100 @@
 						<button id='new_sounder' @click="addSounder" title='Добавить...'><span>+</span></button>
 					</div>
 					-->
-					<div id='config'  v-show="page=='Config'"  class='page'>
-						<h1>Настройки</h1>
-						<article>
-							<h2>Горячие клавиши</h2>
-							<p>При нажатии сочетаний ниже будет воспроизведен звук под соответствующей цифрой</p>
-							<div class='hotkey_tabble'>
-								<div class='col'>
-									<div>
-										<div><label><input type='checkbox' v-model="oHotkeys.SHIFT" @click="setSoundHotkeyShift"> SHIFT</label></div>
-										<div><label><input type='checkbox' v-model="oHotkeys.CTRL" @click="setSoundHotkeyCtrl"> CTRL</label></div>
-										<div><label><input type='checkbox' v-model="oHotkeys.ALT" @click="setSoundHotkeyAlt"> ALT</label></div>
+					<div v-show="page=='Config'"  class='page'>
+						<div class='content'>
+							<h1>Настройки</h1>
+							<div class='flexParent'>
+								<article>
+									<h2>Горячие клавиши потоков</h2>
+									<p>Для потоков заданы следующие горячие клавиши. Для первого - [1] - воспроизведение/пауза, [Q] - следующий трек, [A] - громче, [Z] - тише. Клавиши идут столбиком, аналогично для следующих потоков. Работает для первых девяти.</p>
+									<p>При нажатии сочетаний ниже будет вызвана соответствующая функция потока.</p>
+									<div class='flexParent'>
+										<div class='col middle'>
+											<div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.SHIFT" @click="setPlayListsHotkey"> SHIFT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.CTRL" @click="setPlayListsHotkey"> CTRL</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.ALT" @click="setPlayListsHotkey"> ALT</label></div>
+											</div>
+										</div>
+										<div class='col  middle'>
+											+
+										</div>
+										<div class='col  middle'>
+											Клавиша
+										</div>
 									</div>
-								</div>
-								<div class='col'>
-									+
-								</div>
-								<div class='col'>
-									Цифра
-								</div>
+								</article>
+								<article>
+									<h2>Горячие клавиши звуков</h2>
+									<p>При нажатии сочетаний ниже будет воспроизведен звук под соответствующей цифрой</p>
+									<div class='flexParent'>
+										<div class='col  middle'>
+											<div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.SHIFT" @click="setSoundHotkey"> SHIFT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.CTRL" @click="setSoundHotkey"> CTRL</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.ALT" @click="setSoundHotkey"> ALT</label></div>
+											</div>
+										</div>
+										<div class='col  middle'>
+											+
+										</div>
+										<div class='col middle '>
+											Цифра
+										</div>
+									</div>
+								</article>
 							</div>
-						</article>
+						</div>
+					</div>	
+					
+					<div v-show="page=='Info'"  class='page'>
+						<div class='content'>
+							<h1>Информация</h1>
+							<article>
+								<h2>Обзор</h2>
+								<p>Если у вас на диске есть коллекция музыки, которую вы хотите использовать для создания атмосферы, то этот приложение может вам помочь. Для работы со звуком есть две части: плейлисты (потоки) и панель звуков.</p>
+								<ul>
+									<li>Плейлисты - наборы треков с возможностью зацикливания, группировки, одновременного воспроизведения.</li>
+									<li>Панель звуков - предназначена для одиночного проигрывания относительно коротких эффектов</li>
+								</ul>							
+							</article>
+							
+							<article>
+								<h2>Потоки</h2>
+								<p>Каждый поток может содержать набор треков - обычно мелодий - для воспроизведения их друг за другом.</p>
+								<ul>
+									<li>Чтобы <b>добавить плейлист/поток</b>, нужно нажать большую кнопку <button><i class="fa fa-plus"></i></button> на основном экране.</li>
+									<li>Чтобы <b>добавить треки</b>, нужно нажать кнопку <button><i class="fa fa-plus"></i></button> в левом нижнем углу плейлиста.</li>
+									<li>Кнопка <button><i class="fa fa-random"></i></button> перемешает все треки в плейлисте</li>
+									<li>Переключатель <button><i class="fa fa-eye-slash"></i></button> позволяет скрывать/показывать список воспроизведения в плейлисте.</li>
+									<li>Чтобы <b>отредактирвоать заголовок плейлиста</b> нужно кликнуть по нему 2 раза.</li>
+									<li>Переключатель <button><i class="fa fa-object-ungroup"></i></button> в нижней части плейлиста позволяет добавить текущий плейлист в группу. Для добавления плейлиста в группу, нужно нажать на строку группы.</li>
+									<li>Чтобы <b>удалить плейлист/поток</b>, нужно нажать кнопку <button><i class="fa fa-trash-alt"></i></button> в правом нижнем углу плейлиста.</li>
+								</ul>
+								
+								<h3>Группы</h3>
+								<p>Группы нужны для регулирования одновременного воспроизведения музыки из разных плейлистов. По умолчанию, плейлист не находистя ни в какой группе. Плейлисты без групп, и плейлисты в <i>разных</i> группах могут звучать одновременно.</p>
+								<p>Внутри одной группы может звучать только один плейлист.</p>
+								<p>Зачем это может понадобиться? Напрмер, есть два плейлиста со звуками окружения - ночной лес и дневной. При начале воспроизведения ночного, дневной автоматически станет на паузу. При этом может продолжить звучать другой плейлист с мелодиями.</p>
+								<p>Группы харрактеризуются цветами - можно задать любой. У плейлиста в группе сверху будет цветная полоска, цвет указывает на группу. Группы добавляются/удаляются/редактируются внутри плейлиста.</p>
+								
+							</article>
+							
+							<article>
+								<h2>Звуки</h2>
+								<p>Панель звуков находится в правой части основного экрана. при нажатии на кнопку звука, будет проигран случайный файл из заданного набора.</p>
+								<ul>
+									<li>Чтобы <b>добавить набор звуков</b>, нужно нажать кнопку <button><i class="fa fa-plus"></i></button> в правой панели. Откроется окно настройки набора звуков</li>
+									<li>Название - позволяет указать общую тему набора, появляется во всплывающей подсказке при наведении курсона на копкунабора звуков.</li>
+									<li>Далее можно выбрать иконку, соответствующую звукам. Иконки из набора font awesome. Можно выбрать из набора или указать название.</li>
+									<li>Далее нужно выбрать файл(ы) звуков. Например звуки выстрелов.</li>
+									<li>В строке с каждыйм выбранным файлом будет поее воода, там можно указать цифровой коэффициент - чем он больше, тем выше вероятность, что будет проигран именно этот звук из набора.</li>
+									<li>Чтобы <b>удалить набор звуков</b>, нужно нажать кнопку <button><i class="fa fa-trash-alt"></i> Удалить</button> под списком файлов набора звуков.</li>
+									<li>Чтобы <b>отредактировать набор звуков</b>, нужно перейти в режим редактирвоания - кнопка <button><i class="fa fa-edit"></i></button> внизу панели звуков, и нажать на кнопку набора звуков.</li>
+								</ul>							
+							</article>
+						</div>
 					</div>
 				<!-- <pre> -->
 		<!-- {{aLocalDataDebug}} -->
@@ -261,8 +337,11 @@
 			
 				</div>
 				
-				<div id='new_version' v-show="oMeta.bNewVersionAvailable" v-cloak>
+				<div id='new_version' class='bottom_toolbar' v-show="oMeta.bNewVersionAvailable" v-cloak>
 					{{sNewVersionText}} <a @click='openNewVersion'> новая версия {{oMeta.sLatestVersion}}</a> (Текущая версия: {{oMeta.sCurVersion}})
+				</div>
+				<div  class='bottom_toolbar' v-show="show_help" v-cloak>
+					Если вы впервый раз пользуетесь приложением, можете ознакомиться со справкой, нажав кнопку <i class="fas fa-info"></i> в верхней панели.
 				</div>
 				
 				<transition name="fade">
