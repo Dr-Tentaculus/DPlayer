@@ -1,10 +1,10 @@
 .ico_group{
 	/*.fr-convex;           
-	background: @m-gray + #111;*/
+	background: var(--m-gray) + #111;*/
 	margin: .5rem 0;
-	border-radius: @r-rad;
+	border-radius: var(--radius);
 	padding: .7rem;
-	border :1px solid @m-gray;
+	border :1px solid var(--m-gray);
 	
 	.content{
 		display: flex;
@@ -13,7 +13,7 @@
 		
 		max-height: 200px;
 		overflow: auto;
-		.scrollbars(5px, darken(@m-gray, 15%), @m-gray);
+		.scrollbars(5px, var(--d-gray), var(--m-gray));
 	}
 	.ico_item{
 		flex-basis: 2rem;
@@ -24,13 +24,13 @@
     box-shadow: none;
 		display: flex;
 		&:hover{
-			background: @m-gray + #222;    
+			background: var(--m-gray);    
 		}
 		&:active{
-				background:  @m-gray;    
+				background:  var(--m-gray);    
 		}
 		&.active{
-			color: @color-rev;
+			color: var(--color_bright);
 		}
 		
 		i{

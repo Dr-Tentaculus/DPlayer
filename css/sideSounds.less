@@ -1,5 +1,5 @@
 #sounds_container{
-	@sz: @sidePanelWidth;
+	//@sz: @sidePanelWidth;
 	position: fixed;
 	right: 0;
 	top: 0;
@@ -34,26 +34,26 @@
 
 	.soundButton{
 		.fr-convex;
-		width: @sz;
-		height: @sz;
+		width: var(--size);
+		height: var(--size);
 		padding: .1em;
 		cursor: pointer;
 		display: block;     
 		margin: 0 auto;  
-		background: @m-gray + #111; 
+		background: var(--m-gray); 
 		position: relative;
 		font-size: 120%;
 		counter-increment: tracks;		
 		z-index: 9;
         
 			&:hover{
-					background: @m-gray + #222; 
+					background: var(--m-gray); 
 					.soundSublist{
 						display: flex;
 					}					
 			}
 			&:active{
-					background:  @m-gray;    
+					background:  var(--m-gray);    
 			}
 			
 			&::before{
@@ -75,7 +75,7 @@
       font-size: 14px;
       display: none;
       flex-direction: column;
-      background: darken(@m-gray, 10%);
+      background: var(--m-gray);
       position: absolute;
       left: -11rem;
       top: 0;
@@ -94,10 +94,10 @@
         transition: background .2s;
         margin: 0.2rem 0;
         padding: 0.2rem;
-        background: lighten(@m-gray, 5%);
+        background: var(--m-gray);
         overflow: hidden;
         &:hover {
-          background: lighten(@m-gray, 10%);
+          background: var(--m-gray);
         }
       }
     }
@@ -140,17 +140,17 @@
     }
 	}
 	button{
-		@sz: 10rem;
+		//@sz: 10rem;
 		.fr-convex;
 		display: flex;
 		flex-wrap: wrap;
-		width: @sz;
-		height: @sz;
+		width: var(--size-big);
+		height: var(--size-big);
 		padding: .1em;
 		cursor: pointer;
 		//display: block;     
 		//margin: 0 auto;  
-		background: @m-gray + #111; 
+		background: var(--m-gray); 
 		position: relative;
 		font-size: 120%;
 		counter-increment: big_sounds;		
@@ -158,10 +158,10 @@
 		overflow: hidden;
         
 			&:hover{
-					background: @m-gray + #222; 									
+					background: var(--m-gray); 									
 			}
 			&:active{
-					background:  @m-gray;    
+					background:  var(--m-gray);    
 			}		
 			
 			&::before{

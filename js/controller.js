@@ -3,7 +3,7 @@ const fs = require('fs');
 let w = remote.getCurrentWindow();
 let Sortable = require ('sortablejs');
 
-const VERSION = '1.1'
+const VERSION = '1.2'
 
 var fCtrlIsPressed = false;
 
@@ -658,7 +658,8 @@ Vue.component('playList', {
 		<div class="pf_groups" style="display: block;" v-show="group_opened">
 			<pl-group 
 				v-for="(gr, i) in this.groups"				
-				:key="i"
+				:key="i"				
+				:id="String(_id)+'_'+i"
 				:title="gr.title"
 				:color="gr.color"
 				:edit="gr.edit"
@@ -799,16 +800,7 @@ Vue.component('pl-group', {
 		};
 	},
 	computed: {
-	/*	title: function(){
-			if(this.src && this.src.length) {
-				return this.src.split("/").pop();
-			} 
-			return "";
-		}*/
-		
 		_color: function(){
-			//debugger;
-			
 			return this.color;
 		}
 	},
@@ -831,7 +823,12 @@ Vue.component('pl-group', {
 	},
 	template: `<div class="pl_group">
 		<div class='content'>
-			<input type="color" :value="_color" @change="onColorEdited">
+			<input type="color" :value="_color" @change="onColorEdited" :list="id">
+			<datalist :id="id">
+        <option>#ff0000</option>/>
+        <option>#00ff00</option>
+        <option>#0000ff</option>
+      </datalist>
 			<div v-show='!edit' class="name" :title="title"  @click="onSelect">{{title}}</div>
 			<input v-show='edit' :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'>
 		</div>	
@@ -1207,6 +1204,23 @@ Vue.component('icon_item', {
 					return true;
 				}
 				return false;
+			},
+			
+			sGreating: function(){
+				let nHours = new Date().getHours();
+				
+				if(nHours>4 && nHours<=10) {
+					return "Доброе утро!";
+				}
+				if(nHours>10 && nHours<=18) {
+					return "Добрый день!";
+				}
+				if(nHours>18 && nHours<=22) {
+					return "Добрый вечер!";
+				}
+				if(nHours>22 && nHours<=4) {
+					return "Доброй ночи!";
+				}
 			}
 			
 			
@@ -1730,13 +1744,27 @@ Vue.component('icon_item', {
 				
 				
 			},
+			_transferData: function(oAppData, oSavedData){
+				for (let key in oAppData) {
+					if(typeof oAppData[key] == "object") {
+						this._transferData(oAppData[key], oSavedData[key]);
+					}	else if(Array.isArray(oAppData[key])) {
+						for (let i=0; i < oAppData[key].length; i++) {
+							this._transferData(oAppData[key][i], oSavedData[key][i]);								
+						}
+					} else {
+						if(oSavedData != undefined && oSavedData[key] != undefined) {
+							oAppData[key] = oSavedData[key];
+						}
+					}
+				}
+			},
 			_loadData: function() {
 				let aParams= [
-					//"aSoundCollections",
 					"sAppView",
 					"oWinSizes",
 					"oWin",
-					//"oHotkeys"
+					"oHotkeys"
 				];
 				let that = this;
 				
@@ -1748,7 +1776,12 @@ Vue.component('icon_item', {
 					}
 					if(oLocalData) {						
 						//alert(sParam+": "+JSON.stringify(oLocalData));
-						that[sParam] = oLocalData;
+						//that[sParam] = oLocalData;
+						if(typeof that[sParam] == "object") {
+							that._transferData(that[sParam], oLocalData);
+						} else {
+							that[sParam] = oLocalData;
+						}
 					}
 				}.bind(this));
 				

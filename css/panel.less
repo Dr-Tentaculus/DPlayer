@@ -21,15 +21,15 @@
 	
 	input[type='checkbox'] + label{
 					.fr-convex;           
-					background: @m-gray + #111;
+					background: var(--m-gray);
 				 // width: 100%;
 					display: inline-block;
 					padding: .3em;
 					&:hover{
-							background: @m-gray + #222;    
+							background: var(--m-gray);    
 					}
 					&:active{
-							background:  @m-gray;    
+							background:  var(--m-gray);    
 					}
 					input{
 							display: none;
@@ -37,7 +37,7 @@
 			}
 			input[type='checkbox']:checked + label{
 					.fr-concave;
-					background:  @m-gray - #222;  
+					background:  var(--m-gray);  
 					padding: .3em;  
 			}
 }

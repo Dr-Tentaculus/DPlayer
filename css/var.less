@@ -1,4 +1,4 @@
-@r-rad: 3px;
+@r-rad: 4px;
 @color: #487EC5;
 @color-rev: #fc801c;
 @d-gray: #222;
@@ -28,4 +28,33 @@
 @color_g5: #9c27b0;
 
 @sounder_back: darken(@d-gray, .5);
-@shadow_color: #191919;
+@shadow_color: rgba(0,0,0,.2);
+
+:root{
+	--color_bright: @color-rev;
+	--color: @color;
+	--radius: @r-rad;
+	
+	--dd-gray: darken(@d-gray, 5%);
+	--d-gray: @d-gray;
+	--m-gray: @m-gray;
+	--ml-gray: lighten(@m-gray, 5%);
+	--md-gray: darken(@m-gray, 5%);
+	--l-gray: @l-gray;
+	--white: @white;
+	
+	--color-group-01: @color_g0;
+	--color-group-02: @color_g1;
+	--color-group-03: @color_g2;
+	--color-group-04: @color_g3;
+	--color-group-05: @color_g4;
+	--color-group-01: @color_g5;
+	
+	--color-shadow: @shadow_color;
+	--color-shadow-light: rgba(255,255,255,.15);
+	
+	--padding: @padding;
+	
+	--size: @size;
+	--size-big: 10rem;
+}

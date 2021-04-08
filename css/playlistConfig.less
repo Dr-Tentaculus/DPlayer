@@ -5,7 +5,7 @@
 			cursor: pointer;
 		}
 		&:checked + label{
-			color: @color;
+			color: var(--color);
 		}
 	}
 	.buttonsPlace{
@@ -30,7 +30,7 @@
     list-style-type: none;
     margin: 0;
     padding: 0.3em;
-    border-right: 1px solid @l-gray;
+    border-right: 1px solid var(--l-gray);
     li{
       .row();
       input{
@@ -42,14 +42,14 @@
       cursor: pointer;
       transition: background .2s;
       display: block;
-      background: @white;
+      background: var(--white);
       padding: .1em;
       flex-grow: 99;
       &:hover{
-        background: @l-gray;
+        background: var(--l-gray);
       }
       &.selected{
-        background: darken(@l-gray, 10%);
+        background: var(--m-gray);
       }
     }
   }
@@ -64,7 +64,7 @@
       display: flex;
       justify-content: space-between;
 	  &:nth-child(odd){
-		background: lighten(@l-gray, 5%);
+		background: var(--l-gray);
 	  }
     }
     input {
@@ -74,7 +74,7 @@
   }
   .icoSample{
     min-width: 1.5em;
-    //border: 1px solid lighten(@m-gray, 4%);
+    //border: 1px solid lighten(var(--m-gray), 4%);
     //border-left: none;
     //border-radius: 0 3px 3px 0;
     //margin-right: 0.4em;
@@ -108,7 +108,7 @@
   transition: box-shadow 0.3s, background 0.3s;
 
   &:hover{
-    background: darken(@color, 2%);
+    background: var(--color);
     box-shadow: 0 2px 5px 0px rgba(0, 0, 0, 0.2);
   }
 

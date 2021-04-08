@@ -341,7 +341,7 @@
 					{{sNewVersionText}} <a @click='openNewVersion'> новая версия {{oMeta.sLatestVersion}}</a> (Текущая версия: {{oMeta.sCurVersion}})
 				</div>
 				<div  class='bottom_toolbar' v-show="show_help" v-cloak>
-					Если вы впервый раз пользуетесь приложением, можете ознакомиться со справкой, нажав кнопку <i class="fas fa-info"></i> в верхней панели.
+					{{sGreating}} Если вы впервый раз пользуетесь приложением, можете ознакомиться со справкой, нажав кнопку <i class="fas fa-info"></i> в верхней панели.
 				</div>
 				
 				<transition name="fade">

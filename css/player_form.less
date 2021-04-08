@@ -13,8 +13,8 @@
 	transform: scale(.95);
 }
 .tracklist_drag{
-	box-shadow: 0 0 10px 3px @color;
-	box-shadow: 0 0 10px 3px @color;
+	box-shadow: 0 0 10px 3px var(--color);
+	box-shadow: 0 0 10px 3px var(--color);
 	transform: scale(1.1);
 }
 #playLists{
@@ -28,14 +28,14 @@
   .fr-concave();
   //float: left;
   width: 12em;
-  background: @m-gray;
+  background: var(--m-gray);
   padding: .1em;
   position: relative;
-  border-top: 2px solid @m-gray;
+  border-top: 2px solid var(--m-gray);
   transition: border-top .2s, transform .2s, border-top .2s;
 	
 	border-top-color: attr(data-color);
-
+/*
   &[data-group=g1] {
     border-top: 2px solid @color_g1;
   }
@@ -51,7 +51,7 @@
   &[data-group=g5] {
     border-top: 2px solid @color_g5;
   }
-
+*/
 	input[type="file"] {
 		display: none;
 	}
@@ -59,7 +59,7 @@
 		display: none;
 		
 		&:checked+label{
-			color: @color-rev;
+			color: var(--color_bright);
 		}
 	}
 	.ico_button{
@@ -70,24 +70,25 @@
 		background: transparent;
 		border-color: transparent;
 		display: inline-block;
-		color: @l-gray;
+		color: var(--l-gray);
 		cursor: pointer;
 		transition: opacity .2s, color .2s, backbround .2s, border-color .2s;
 		&:hover{			
-			border-color: @m-gray;
-			background: @m-gray;
+			border-color: var(--m-gray);
+			background: var(--m-gray);
 		}
 		&:active{
-			color: @color-rev;			
+			color: var(--color_bright);			
 		}
 		
 		&.active{
-			color: @color-rev;
+			color: var(--color_bright);
 		}
 	}
 
   .blank(){
-    .fr-convex;
+    .fr-concave;
+		background: var(--md-gray);
     padding: .2em;
     margin: .1em;
     cursor: default;
@@ -120,14 +121,14 @@
         }
         .mix{
             .fr-convex;           
-            background: @m-gray + #111;
+            background: var(--m-gray);
             padding: .3em;
             font-size: inherit;
             &:hover{
-                background: @m-gray + #222;    
+                background: var(--m-gray)    
             }
             &:active{
-                background:  @m-gray;    
+                background:  var(--m-gray);    
             }
         }
         
@@ -136,15 +137,15 @@
         }
         input.hide + label{
             .fr-convex;           
-            background: @m-gray + #111;
+            background: var(--m-gray);
             width: 100%;
             display: inline-block;
             padding: .3em;
             &:hover{
-                background: @m-gray + #222;    
+                background: var(--m-gray);    
             }
             &:active{
-                background:  @m-gray;    
+                background:  var(--m-gray);    
             }
             input{
                 display: none;
@@ -152,7 +153,7 @@
         }
         input.hide:checked + label{
             .fr-concave;
-            background:  @m-gray - #222;  
+            background:  var(--m-gray);  
             padding: .3em;  
         }
         
@@ -162,16 +163,16 @@
         }
         input.cycle + label{
             .fr-convex;           
-            background: @m-gray + #111;
+            background: var(--m-gray);
             width: 100%;
             display: inline-block;
             padding: .3em;
             
             &:hover{
-                background: @m-gray + #222;    
+                background: var(--m-gray);    
             }
             &:active{
-                background:  @m-gray;    
+                background:  var(--m-gray);    
             }
             input{
                 display: none;
@@ -179,7 +180,7 @@
         }
         input.cycle:checked + label{
             .fr-concave;
-            background:  @m-gray - #222; 
+            background:  var(--m-gray); 
             padding: .3em;   
         }
         
@@ -205,52 +206,51 @@
         @sz: 4em;
 		//font-size: 1.6rem;
         button.pf_play_bt{
-            .fr-convex;
+           /* .fr-convex;*/
             //font-size: inherit;
 						font-size: 1.6em;
             width: @sz;
             height: @sz;
             cursor: pointer;
             display: block;     
-            margin: 0 auto;  
-            background: @m-gray + #111;
+            margin: .1rem auto;  
+           // background: var(--m-gray);
           i{
             font-size: 1.9em;
           }
-            
+            /*
             &:hover{
-                background: @m-gray + #222;    
+                background: var(--m-gray);    
             }
             &:active{
-                background:  @m-gray;    
-            }
+                background:  var(--m-gray);    
+            }*/
         }
         button.pf_next_bt{
-             .fr-convex;
+            // .fr-convex;
             font-size: inherit;
             //@sz: 8em;
             width: @sz*1.6;
             cursor: pointer;
             display: block;                 
-            margin: 0 auto;
-            background: @m-gray + #111;
+            margin: .1rem auto;
           i{
             font-size: 1.4em;
           }
-            
+            /*
             &:hover{
-                background: @m-gray + #222;    
+                background: var(--m-gray);    
             }
             &:active{
-                background:  @m-gray;    
-            }
+                background:  var(--m-gray);    
+            }*/
         }
     }
 	.pf_list_length{
 		position: absolute; 
 		bottom: 0; 
 		right: 0; 
-		color: @d-gray;
+		color: var(--d-gray);
 	}
 	.pf_trek_timeline{
 		.fr-concave();
@@ -258,7 +258,7 @@
 		margin: 0;
 		width: auto;
 		//height: 3px;
-		background: darken(@m-gray, 20%);
+		background: var(--m-gray);
 		position: relative;
 		top: 0.2em;
 		//margin-top: 20px;
@@ -268,8 +268,8 @@
 		.pf_trek_playhead{
 			height: 3px;
 			width: 0%;
-			background: @color-rev;
-			//background: linear-gradient(0deg, @color-rev, fade(@color-rev, 0%));// @color-rev; //rgba(0, 255, 196, 0.82);
+			background: var(--color_bright);
+			//background: linear-gradient(0deg, var(--color_bright), fade(@color-rev, 0%));// var(--color_bright); //rgba(0, 255, 196, 0.82);
 		}
 	}
     .pf_name{
@@ -293,7 +293,7 @@
 						bottom: 0;
 						width: 1em;
 						height: 1.2em;
-						background: linear-gradient(to right, fade(@m-gray - #111, 0%), @m-gray - #111);
+						background: linear-gradient(to right, var(--m-gray), var(--m-gray) );
 					}
 				
 				}
@@ -313,8 +313,7 @@
     }
 		.pf_groups,
     .pf_list{
-        //.blank();
-      .fr-concave;
+      .blank();      
       padding: 0;//.2em;
       margin: .1em;
       cursor: default;
@@ -324,7 +323,7 @@
 			height: 12em;
 			counter-reset: tracks;
 
-			.scrollbars(5px, darken(@m-gray, 15%), @m-gray);
+			.scrollbars(5px, var(--d-gray), var(--m-gray));
 
     }
     .pf_l_sett{
@@ -354,7 +353,7 @@
 		.remove{
 			background: transparent;
 			border-color: transparent;
-			color: @l-gray;
+			color: var(--l-gray);
 			cursor: pointer;
 			
 			opacity: .5;
@@ -364,7 +363,7 @@
 				opacity: 1;				
 			}
 			&:active{
-				color: @color-rev;			
+				color: var(--color_bright);			
 			}
 		}
 
@@ -388,7 +387,7 @@
 				background: rgba(255,255,255, .18);  
 		}
 		&.active{
-				background: @color-rev;
+				background: var(--color_bright);
 		}
 		input{
 			margin-right: .3rem;
@@ -409,13 +408,13 @@
 	}
 }
 .pf_play_bt .fa-pause{
-    color: @color-rev;
+    color: var(--color_bright);
 }
 
 
 .addButton{
 	.fr-convex;           
-	background: @m-gray + #111;
+	background: var(--m-gray);
 	width: 100%;
 	display: inline-block;
 	padding: .3em;
@@ -424,10 +423,10 @@
 	transition: background .2s;
 	
 	&:hover{
-			background: @m-gray + #222;    
+			background: var(--m-gray);    
 	}
 	&:active{
-			background:  @m-gray;    
+			background:  var(--m-gray);    
 	}
 }
 
@@ -440,7 +439,7 @@
 	
 	span{
 		.fr-convex;           
-		background: @d-gray + #111;
+		background: var(--d-gray);
 		opacity: .6;
 		width: 100%;
 
@@ -455,10 +454,10 @@
 	}
 	
 	&:hover span{
-			background: @m-gray + #222;    
+			background: var(--m-gray);    
 			opacity: 1;
 	}
 	&:active span{
-			background:  @m-gray;    
+			background:  var(--m-gray);    
 	}
 }
