@@ -18,10 +18,14 @@ a{
 	color: var(--color);
 	cursor: pointer;
 }
-
-button,
-.btn{
+.btn_active(){
+	.fr-convex;
+	background:  var(--mdd-gray);    
+	transform: translateY(1px); 
+}
+.btn(){
 	.fr-concave;
+	text-align: center;
 	padding: .4rem;
 	margin: .2rem;
 	cursor: pointer;
@@ -33,16 +37,14 @@ button,
 	}
 	&:active,
 	&.active{
-			.fr-convex;
-			background:  var(--md-gray);    
-			transform: translateY(1px); 
+			.btn_active()
 	}
 	
 	&.obscured {
-		background: var(--d-gray);
+		background: var(--mdd-gray);;
 		opacity: .6;
 		&:hover{
-			background: var(--m-gray);   
+			background: var(--mв-gray);   
 			opacity: 1;
 		}
 		&:active{
@@ -53,10 +55,17 @@ button,
 		color: var(--color_bright);
 	}*/
 }
+button,
+.btn{
+	.btn();
+}
+input:checked + label{
+	.btn_active();
+}
  
- .padding{
+.padding{
 	padding: 1rem;
- }
+}
 
 .cinput{
 	border-radius: var(--radius);
@@ -91,7 +100,7 @@ button,
 		left: 0;
 		right: 0;		
 		
-		.scrollbars(5px, var(--d-gray), var(--m-gray));
+		.scrollbars(5px, var(--mddd-gray), var(--md-gray));
 	}
 	/*
 	&.default{

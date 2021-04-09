@@ -30,6 +30,7 @@
   width: 12em;
   background: var(--m-gray);
   padding: .1em;
+	marvin: var(--padding);
   position: relative;
   border-top: 2px solid var(--m-gray);
   transition: border-top .2s, transform .2s, border-top .2s;
@@ -55,13 +56,13 @@
 	input[type="file"] {
 		display: none;
 	}
-	input[type="checkbox"] {
+	/*input[type="checkbox"] {
 		display: none;
 		
 		&:checked+label{
 			color: var(--color_bright);
 		}
-	}
+	}*/
 	.ico_button{
 		.fr-convex;
 		box-shadow: none;
@@ -107,19 +108,25 @@
         .blank();
         overflow: hidden;
         height: auto;
-        
+        display: flex;
         .btns, .vol{
-            float: left;
-            width: 50%;
-            //height: 9em;
-            text-align: center;
+					flex-grow: 1;
+					display: flex;
+					flex-direction: column;
+					
         }
-        .btn{
+				.vol{
+					input,
+					.vol_num{
+						margin: auto;
+					}
+				}
+       /* .btn{
             width: 100%;
             display: inline-block;
-            padding: 1em;
-        }
-        .mix{
+            padding: .3rem;
+        }*/
+        /*.mix{
             .fr-convex;           
             background: var(--m-gray);
             padding: .3em;
@@ -130,12 +137,12 @@
             &:active{
                 background:  var(--m-gray);    
             }
-        }
+        }*/
         
         input.hide{
             display: none;
         }
-        input.hide + label{
+        /*input.hide + label{
             .fr-convex;           
             background: var(--m-gray);
             width: 100%;
@@ -155,14 +162,14 @@
             .fr-concave;
             background:  var(--m-gray);  
             padding: .3em;  
-        }
+        }*/
         
         
         input.cycle{
             display: none;
         }
         input.cycle + label{
-            .fr-convex;           
+            /*.fr-convex;           
             background: var(--m-gray);
             width: 100%;
             display: inline-block;
@@ -176,13 +183,14 @@
             }
             input{
                 display: none;
-            }
+            }*/
+						//.btn();
         }
-        input.cycle:checked + label{
+        /*input.cycle:checked + label{
             .fr-concave;
             background:  var(--m-gray); 
             padding: .3em;   
-        }
+        }*/
         
         .volume{
           font-size: inherit;
@@ -253,7 +261,7 @@
 		color: var(--d-gray);
 	}
 	.pf_trek_timeline{
-		.fr-concave();
+		.fr-convex();
 		padding: 1px;
 		margin: 0;
 		width: auto;
@@ -285,6 +293,7 @@
 				.title{
 					position: relative;
 					padding: .2rem;
+					overflow: hidden;
 					&:after{
 						content: " ";
 						position: absolute;
@@ -293,7 +302,7 @@
 						bottom: 0;
 						width: 1em;
 						height: 1.2em;
-						background: linear-gradient(to right, var(--m-gray), var(--m-gray) );
+						background: linear-gradient(to right, transparent, var(--md-gray) );
 					}
 				
 				}

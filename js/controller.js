@@ -623,11 +623,11 @@ Vue.component('playList', {
 		<!--<div class="pf_lt">1 Q A Z</div>-->
 		<div class="pf_sett">
 			<div class="btns">
-				<input type="checkbox" :checked="loop" :id="cycle_id" class="btn cycle" @change="onLooped">
-				<label :for="cycle_id" title='Зациклить 1 трек'><i class="fa fa-retweet"></i></label>
+				<input type="checkbox" :checked="loop" :id="cycle_id" class="hide cycle" @change="onLooped">
+				<label :for="cycle_id" title='Зациклить 1 трек' class='btn'><i class="fa fa-retweet"></i></label>
 				<button class="btn mix" @click="onRandom" title='Перемешать треки'><i class="fa fa-random"></i></button>
-				<input type="checkbox" :checked="compact" :id="compact_id" class="btn hide" @change="onCompacted">
-				<label :for="compact_id" title='Скрыть/показать треки'><i class="fa fa-eye-slash"></i></label>
+				<input type="checkbox" :checked="compact" :id="compact_id" class="hide" @change="onCompacted">
+				<label :for="compact_id" title='Скрыть/показать треки'  class='btn'><i class="fa fa-eye-slash"></i></label>
 			</div>
 			<div class="vol">
 				<input type="range" orient="vertical" class="volume" min="0" max="100" :value="_volume" @change="onVolumed">
