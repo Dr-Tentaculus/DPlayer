@@ -40,11 +40,16 @@ a{
 			.btn_active()
 	}
 	
+	&.compact{
+		padding: 0;
+		margin: 0;
+	}
+	
 	&.obscured {
 		background: var(--mdd-gray);;
 		opacity: .6;
 		&:hover{
-			background: var(--mв-gray);   
+			background: var(--md-gray);   
 			opacity: 1;
 		}
 		&:active{
@@ -55,6 +60,11 @@ a{
 		color: var(--color_bright);
 	}*/
 }
+
+.scroll_bar(){
+	.scrollbars(5px, var(--md-gray), var(--dl-gray));
+}
+
 button,
 .btn{
 	.btn();
@@ -100,7 +110,7 @@ input:checked + label{
 		left: 0;
 		right: 0;		
 		
-		.scrollbars(5px, var(--mddd-gray), var(--md-gray));
+		.scrollbars(5px, var(--md-gray), var(--dl-gray));
 	}
 	/*
 	&.default{
@@ -182,7 +192,7 @@ input:checked + label{
 #config,
 #soundpad{
 	overflow-y: auto;	
-	.scrollbars(.15rem, var(--m-gray), var(--m-gray));
+	.scrollbars(5px, var(--md-gray), var(--dl-gray));
 }
 .bottom_toolbar{
 	color: var(--m-gray);

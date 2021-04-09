@@ -4,6 +4,7 @@
   --radius: 4px;
   --dd-gray: #151515;
   --d-gray: #222;
+  --dl-gray: #2f2f2f;
   --mdd-gray: #5e5e5e;
   --md-gray: #6a6a6a;
   --m-gray: #777;
@@ -363,14 +364,19 @@ button.active,
   background: var(--mdd-gray);
   transform: translateY(1px);
 }
+button.compact,
+.btn.compact {
+  padding: 0;
+  margin: 0;
+}
 button.obscured,
 .btn.obscured {
-  background: var(--d-gray);
+  background: var(--mdd-gray);
   opacity: .6;
 }
 button.obscured:hover,
 .btn.obscured:hover {
-  background: var(--m-gray);
+  background: var(--md-gray);
   opacity: 1;
 }
 button.obscured:active,
@@ -505,28 +511,28 @@ input:checked + label {
   height: 5px;
 }
 #app .page::-webkit-scrollbar-thumb {
-  background: var(--mddd-gray);
-}
-#app .page::-webkit-scrollbar-track {
   background: var(--md-gray);
 }
+#app .page::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
 #app .page body {
-  scrollbar-face-color: var(--mddd-gray);
-  scrollbar-track-color: var(--md-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 #app .page::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 #app .page::-webkit-scrollbar-thumb {
-  background: var(--mddd-gray);
-}
-#app .page::-webkit-scrollbar-track {
   background: var(--md-gray);
 }
+#app .page::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
 #app .page body {
-  scrollbar-face-color: var(--mddd-gray);
-  scrollbar-track-color: var(--md-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 #toolbar {
   display: flex;
@@ -558,46 +564,46 @@ input:checked + label {
 #edit::-webkit-scrollbar,
 #config::-webkit-scrollbar,
 #soundpad::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 #edit::-webkit-scrollbar-thumb,
 #config::-webkit-scrollbar-thumb,
 #soundpad::-webkit-scrollbar-thumb {
-  background: var(--m-gray);
+  background: var(--md-gray);
 }
 #edit::-webkit-scrollbar-track,
 #config::-webkit-scrollbar-track,
 #soundpad::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 #edit body,
 #config body,
 #soundpad body {
-  scrollbar-face-color: var(--m-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 #edit::-webkit-scrollbar,
 #config::-webkit-scrollbar,
 #soundpad::-webkit-scrollbar {
-  width: 0.15rem;
-  height: 0.15rem;
+  width: 5px;
+  height: 5px;
 }
 #edit::-webkit-scrollbar-thumb,
 #config::-webkit-scrollbar-thumb,
 #soundpad::-webkit-scrollbar-thumb {
-  background: var(--m-gray);
+  background: var(--md-gray);
 }
 #edit::-webkit-scrollbar-track,
 #config::-webkit-scrollbar-track,
 #soundpad::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 #edit body,
 #config body,
 #soundpad body {
-  scrollbar-face-color: var(--m-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .bottom_toolbar {
   color: var(--m-gray);
@@ -784,42 +790,13 @@ input:checked + label {
   flex-grow: 1;
 }
 #soundpad {
-  overflow-y: auto;
-}
-#soundpad::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-#soundpad::-webkit-scrollbar-thumb {
-  background: var(--m-gray);
-}
-#soundpad::-webkit-scrollbar-track {
-  background: var(--d-gray);
-}
-#soundpad body {
-  scrollbar-face-color: var(--m-gray);
-  scrollbar-track-color: var(--d-gray);
-}
-#soundpad::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-#soundpad::-webkit-scrollbar-thumb {
-  background: var(--m-gray);
-}
-#soundpad::-webkit-scrollbar-track {
-  background: var(--d-gray);
-}
-#soundpad body {
-  scrollbar-face-color: var(--m-gray);
-  scrollbar-track-color: var(--d-gray);
-}
-#soundpad {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   flex-wrap: wrap;
   align-items: stretch;
+  overflow-y: auto;
+  margin-right: var(--padding);
   flex-direction: column;
   justify-content: start;
 }
@@ -827,6 +804,34 @@ input:checked + label {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+#soundpad::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#soundpad::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#soundpad::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#soundpad body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
+}
+#soundpad::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#soundpad::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#soundpad::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#soundpad body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .sounder {
   --bg_color: var(--ml-gray);
@@ -983,28 +988,28 @@ input:checked + label {
   height: 5px;
 }
 .sound_list::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--md-gray);
 }
 .sound_list::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 .sound_list body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .sound_list::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 .sound_list::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--md-gray);
 }
 .sound_list::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 .sound_list body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .sounditem {
   display: flex;
@@ -1184,28 +1189,28 @@ input:checked + label {
   height: 5px;
 }
 .ico_group .content::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--md-gray);
 }
 .ico_group .content::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 .ico_group .content body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .ico_group .content::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 .ico_group .content::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--md-gray);
 }
 .ico_group .content::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--dl-gray);
 }
 .ico_group .content body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 .ico_group .ico_item {
   flex-basis: 2rem;
@@ -1292,7 +1297,7 @@ input:checked + label {
   width: 12em;
   background: var(--m-gray);
   padding: .1em;
-  marvin: var(--padding);
+  margin: var(--padding);
   position: relative;
   border-top: 2px solid var(--m-gray);
   transition: border-top 0.2s, transform 0.2s, border-top 0.2s;
@@ -1825,16 +1830,16 @@ input:checked + label {
 }
 .player_form .pf_groups::-webkit-scrollbar-thumb,
 .player_form .pf_list::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--l-gray);
 }
 .player_form .pf_groups::-webkit-scrollbar-track,
 .player_form .pf_list::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--ml-gray);
 }
 .player_form .pf_groups body,
 .player_form .pf_list body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--l-gray);
+  scrollbar-track-color: var(--ml-gray);
 }
 .player_form .pf_groups::-webkit-scrollbar,
 .player_form .pf_list::-webkit-scrollbar {
@@ -1843,16 +1848,16 @@ input:checked + label {
 }
 .player_form .pf_groups::-webkit-scrollbar-thumb,
 .player_form .pf_list::-webkit-scrollbar-thumb {
-  background: var(--d-gray);
+  background: var(--l-gray);
 }
 .player_form .pf_groups::-webkit-scrollbar-track,
 .player_form .pf_list::-webkit-scrollbar-track {
-  background: var(--m-gray);
+  background: var(--ml-gray);
 }
 .player_form .pf_groups body,
 .player_form .pf_list body {
-  scrollbar-face-color: var(--d-gray);
-  scrollbar-track-color: var(--m-gray);
+  scrollbar-face-color: var(--l-gray);
+  scrollbar-track-color: var(--ml-gray);
 }
 .player_form .pf_l_sett {
   --bg_color: var(--m-gray);
@@ -2378,6 +2383,9 @@ input:checked + label {
 .page {
   color: var(--l-gray);
 }
+.page h1 {
+  margin: 1rem;
+}
 .page > .content {
   padding: 1rem;
   margin: 1rem auto;
@@ -2388,7 +2396,7 @@ input:checked + label {
   margin: 1rem;
   line-height: 1.6;
   border-radius: var(--radius);
-  border: 1px solid var(--d-gray);
+  border: 1px solid var(--mdd-gray);
 }
 .page .flexParent article {
   flex-basis: 30rem;

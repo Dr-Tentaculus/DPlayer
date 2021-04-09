@@ -726,7 +726,7 @@ Vue.component('pl-track', {
 		<div class='content'>
 			<div class="name" :title="src">{{title}}</div>
 		</div>	
-		<button class='remove' @click="remove" title='Удалить из потока'><i class="fa fa-trash-alt"></i></button>
+		<button class='remove compact' @click="remove" title='Удалить из потока'><i class="fa fa-trash-alt"></i></button>
 	</div>`
 });
 
@@ -770,7 +770,7 @@ Vue.component('sound_item', {
 			<input class='cinput' :value="number" @change="onNumberEdited" type='number' min="0">
 			<div class="name" :title="src">{{title}}</div>
 		</div>	
-		<button class='remove' @click="remove" title='Удалить'><i class="fa fa-trash-alt"></i></button>
+		<button class='remove  compact' @click="remove" title='Удалить'><i class="fa fa-trash-alt"></i></button>
 	</div>`
 
 });
@@ -832,7 +832,7 @@ Vue.component('pl-group', {
 			<div v-show='!edit' class="name" :title="title"  @click="onSelect">{{title}}</div>
 			<input v-show='edit' :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'>
 		</div>	
-		<button class='remove' @click="remove" title='Удалить группу'><i class="fa fa-trash-alt"></i></button>
+		<button class='remove compact' @click="remove" title='Удалить группу'><i class="fa fa-trash-alt"></i></button>
 	</div>`
 });
 
