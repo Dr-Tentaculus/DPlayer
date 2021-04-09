@@ -1686,16 +1686,22 @@ Vue.component('icon_item', {
 						if (e.ctrlKey || e.metaKey) {
 								this.oHotkeys.oKeyPressed.CTRL = true;
 						}
-						// if (e.ctrlKey || e.metaKey) {
-								// this.oHotkeys.oKeyPressed.SHIFT = true;
-						// }
-						// if (e.ctrlKey || e.metaKey) {
-								// this.oHotkeys.oKeyPressed.ALT = true;
-						// }
+						if (e.shiftKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.SHIFT = true;
+						}
+						if (e.altKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.ALT = true;
+						}
 				}.bind(this);
 				document.onkeyup = function(e) {
 						if (e.ctrlKey || e.metaKey) {
 								this.oHotkeys.oKeyPressed.CTRL = false;
+						}
+						if (e.shiftKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.SHIFT = false;
+						}
+						if (e.altKey || e.metaKey) {
+								this.oHotkeys.oKeyPressed.ALT = false;
 						}
 						if (e.key === "1") {
 								//e.preventDefault(); // present "Save Page" from getting triggered.
