@@ -1029,7 +1029,8 @@ Vue.component('icon_item', {
 						// }
 					],
 					id: "",
-					ico_filter: ""
+					ico_filter: "",
+					index: 0
 				}
 			},
 			//bEditMode: false,
@@ -1225,9 +1226,13 @@ Vue.component('icon_item', {
 			
 			
 		},
-		mounted: function() {			
+		created: function(){
 			this.start();
-			//this._initSortable();
+		},
+		mounted: async function() {			
+			//await this.start();
+			this._initSortablePlaylists();
+			this._initSortableSounds();
 			this._setHotkeys();
 			this._checkUpdates();
 			
@@ -1262,13 +1267,18 @@ Vue.component('icon_item', {
 		},
 		methods: {
 			start: function(){
-				this._loadData();
-				this._startDB().then(()=>{
-					this._loadFromDB();
-					this.sounder.edit = false;
-					this.edit_sounds();
-				
-					setTimeout(()=>{this.bReady = true}, 20);
+				return new Promise((resolve, reject)=>{
+					this._loadData();
+					this._startDB().then(()=>{
+						this._loadFromDB();
+						this.sounder.edit = false;
+						this.edit_sounds();
+					
+						setTimeout(()=>{
+							this.bReady = true;
+							resolve();
+						}, 20);
+					});					
 				});
 			},
 			_startDB: function(){
@@ -1328,7 +1338,7 @@ Vue.component('icon_item', {
 			_loadFromDB: async function(){				
 					let aPlayLists = await this._getCollection('PlayLists');
 					if(aPlayLists) {
-						this.aPlayLists = aPlayLists;
+						this.aPlayLists = aPlayLists.sort((a,b)=>a.index-b.index);
 					}				
 					let aPlayListGroups = await this._getCollection('PlayListGroups');
 					if(aPlayListGroups) {
@@ -1336,7 +1346,7 @@ Vue.component('icon_item', {
 					}				
 					let aSoundCollections = await this._getCollection('Sounds');
 					if(aSoundCollections) {
-						this.aSoundCollections = aSoundCollections;
+						this.aSoundCollections = aSoundCollections.sort((a,b)=>a.index-b.index);
 						this.aSoundCollections.forEach(oSounder=>{
 							oSounder.active = false;
 						});
@@ -1610,7 +1620,7 @@ Vue.component('icon_item', {
 			add_playlist: function(){
 				let oPlayList = {
 					id: guidGenerator(),
-					order: this.aPlayLists.length,
+					index: this.aPlayLists.length,
 					title: `Плейлист ${this.aPlayLists.length}`,
 					color: "red",
 					group: "",
@@ -1629,7 +1639,7 @@ Vue.component('icon_item', {
 				};
 				this.aPlayLists.push(oPlayList);
 				this._addToCollection('PlayLists', oPlayList);
-				
+				this._initSortablePlaylists();
 			},
 			
 			remove_playlist: function(sPlayListId){
@@ -1719,17 +1729,52 @@ Vue.component('icon_item', {
 				}
 			},
 			
-			initSortable: function(){				
+			_initSortablePlaylists: function(){	
+				debugger;			
 				let that = this;
 				setTimeout(function(){
-					let oList = document.getElementById('edit');
+					let oList = document.getElementById('playLists');
 					Sortable.create(oList, {
-						handle: ".handler",
+						handle: ".pf_name",
+						ghostClass: "drag_ghost",
+						dragClass: "drag_drag",
+						onEnd: that.PlaylistsReordered
+					});
+				}, 100);
+			},
+			PlaylistsReordered: function(oEvent){
+				debugger; 
+				let sId = oEvent.item.id.replace('pl_','');
+				let oPlaylist = this.aPlayLists.find(el=>el.id==sId);
+				this.aPlayLists.splice(oEvent.oldIndex,1);
+				this.aPlayLists.splice(oEvent.newIndex, 0, oPlaylist); 
+				this.aPlayLists.forEach((oPlaylist, i)=>{
+					oPlaylist.index = i;
+					this._updateCollection('PlayLists', oPlaylist);
+				});		
+			},
+			_initSortableSounds: function(){	
+				debugger;			
+				let that = this;
+				setTimeout(function(){
+					let oList = document.getElementById('sounds_wrapper');
+					Sortable.create(oList, {
+						//handle: ".handler",
 						ghostClass: "drag_ghost",
 						dragClass: "drag_drag",
 						onEnd: that.SoundersReordered
 					});
 				}, 100);
+			},
+			SoundersReordered: function(oEvent){
+				debugger;
+				let oSounder = this.aSoundCollections.find(el=>el.id==oEvent.item.id);
+				this.aSoundCollections.splice(oEvent.oldIndex,1);
+				this.aSoundCollections.splice(oEvent.newIndex, 0, oSounder); 
+				this.aSoundCollections.forEach((oSounder, i)=>{
+					oSounder.index = i;
+					this._updateCollection('Sounds', oSounder);
+				});		
 			},
 			
 			_saveData: function(sParam) {
@@ -1915,7 +1960,8 @@ Vue.component('icon_item', {
 					title: "",
 					id: sNewId,
 					ico: this.aIconNames[randd(0, this.aIconNames.length)],
-					items: []
+					items: [],
+					index: this.aSoundCollections.length
 				};
 				this.aSoundCollections.push(oSounder);
 				
@@ -1924,7 +1970,7 @@ Vue.component('icon_item', {
 				this._addToCollection('Sounds', oSounder);
 				
 				//this._saveData();
-				//this._initSortable();
+				this._initSortableSounds();
 			},
 			
 			remove_sounder: function(){
@@ -1943,7 +1989,7 @@ Vue.component('icon_item', {
 				this._saveData();
 			},
 			
-			SoundersReordered: function(){
+			/*SoundersReordered: function(){
 				let oNewIdList = {};
 				let aConf = document.querySelectorAll(".sconf");
 				for(let i=0; i<aConf.length; i++) {
@@ -1953,7 +1999,7 @@ Vue.component('icon_item', {
 					return oNewIdList[a.id]-oNewIdList[b.id];
 				});
 				this._saveData();
-			},
+			},*/
 			
 			proxy: function(sMethod){
 				this[sMethod]();
@@ -1995,6 +2041,30 @@ Vue.component('icon_item', {
 				this._postWindow();
 			},
 			*/
+			
+		/*	_initSortable: function(){				
+				let that = this;
+				setTimeout(function(){
+					let oList = document.getElementById('soundpad');
+					Sortable.create(oList, {
+						handle: ".handler",
+						ghostClass: "drag_ghost",
+						dragClass: "drag_drag",
+						onEnd: that.SoundersReordered
+					});
+				}, 100);
+			},
+			SoundersReordered: function(){
+				let oNewIdList = {};
+				let aConf = document.querySelectorAll(".sounder");
+				for(let i=0; i<aConf.length; i++) {
+					oNewIdList[aConf[i].dataset.id] = i;
+				}
+				this.aSoundCollections = this.aSoundCollections.sort(function(a,b){
+					return oNewIdList[a.id]-oNewIdList[b.id];
+				});
+				this._saveData();
+			},*/
 			
 			_postWindow() {
 				const { width, height } = remote.screen.getPrimaryDisplay().workAreaSize;

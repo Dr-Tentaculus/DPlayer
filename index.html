@@ -104,17 +104,19 @@
 						<div id='soundpad_wrapper' :class="{editing: sounder.edit}">
 							<div class='soundpad_container'>
 								<div id="soundpad">
-									<sounder
-										v-for="item in aSoundCollections"
-										:key="item.id"
-										:id="item.id"
-										:title="item.title"
-										:items="item.items"
-										:ico="item.ico"
-										:active="item.active"
-										@press="sounder_press(item.id)"
-									>
-									</sounder>
+									<div id="sounds_wrapper">
+										<sounder
+											v-for="item in aSoundCollections"
+											:key="item.id"
+											:id="item.id"
+											:title="item.title"
+											:items="item.items"
+											:ico="item.ico"
+											:active="item.active"
+											@press="sounder_press(item.id)"
+										>
+										</sounder>
+									</div>
 									<button id='new_sounder' @click="addSounder" title='Добавить набор звуков'><i class="fa fa-plus"></i></button>
 								</div>
 								<div id='soundpad_toolbar'>
@@ -357,7 +359,7 @@
 				<script type='text/javascript' src='js/Sortable.js' defer></script>
 				<script type='text/javascript' src='js/controller.js' defer></script>
 				<script>
-					document.addEventListener('drop', (e) => {
+					/*document.addEventListener('drop', (e) => {
 						e.preventDefault();
 						e.stopPropagation();
 
@@ -376,7 +378,7 @@
 					document.addEventListener('dragover', (e) => {
 						e.preventDefault();
 						e.stopPropagation();
-					});
+					});*/
 				</script>
 				 <script>
             /**
