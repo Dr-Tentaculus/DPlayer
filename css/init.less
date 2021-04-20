@@ -22,6 +22,11 @@ a{
 	.fr-convex;
 	background:  var(--mdd-gray);    
 	transform: translateY(1px); 
+	color: var(--color_bright);
+	
+	&:hover{
+		background: var(--ml-gray);    
+	}
 }
 .btn(){
 	.fr-concave;
@@ -181,6 +186,8 @@ input:checked + label{
 	-webkit-app-region: drag;
 	.panel{
 		//.flexParent();
+		display: flex;
+		flex-wrap: wrap;
 	}
 }
 
@@ -250,10 +257,14 @@ input:checked + label{
 	}
 	
 	&.active{
-		background: var(--m-gray);
+		background: transparent;
+		border-color: transparent;
 		i{
-			color: var(--white);
+			color: var(--color_bright);
 		}
+	}
+	&.contents.active{
+		background: var(--m-gray);
 	}
 
 	&:hover{
@@ -265,7 +276,7 @@ input:checked + label{
 	&:active{
 		background: var(--d-gray);
 		i{
-			color: var(--white);
+			color: var(--color_bright);
 		}
 	}
 

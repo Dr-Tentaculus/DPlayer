@@ -3,7 +3,7 @@ const fs = require('fs');
 let w = remote.getCurrentWindow();
 let Sortable = require ('sortablejs');
 
-const VERSION = '1.2'
+const VERSION = '1.3'
 
 var fCtrlIsPressed = false;
 
@@ -100,7 +100,17 @@ Vue.component('sounder', {
 	},
 	methods: {		
 		getRandomSound: function(){
-			return (this.items && this.items.length>0)?this.items[randd(0, this.items.length-1)].src : "";
+			if(this.items && this.items.length>0){
+				let aList = [];
+				for (let i=0; i<this.items.length; i++) {
+					for (let j=0; j<(this.items[i].number || 1); j++) {
+						aList.push(this.items[i].src);
+					}
+				}
+				return aList[randd(0, aList.length-1)];
+			}
+			return "";
+			//return (this.items && this.items.length>0)?this.items[randd(0, this.items.length-1)].src : "";
 		},
 		itemclick: function(oEvent){
 			//this.$emit('iclick', oEvent);
@@ -166,6 +176,10 @@ Vue.component('titem', {
 			type: String,
 			default: ""
 		},
+		subtype: {
+			type: String,
+			default: ""
+		},
 		active: {
 			type: Boolean,
 			default: false
@@ -185,6 +199,9 @@ Vue.component('titem', {
 			let aClass = ["toolbar_item"];
 			if(this.type=='switch' && this.active==true) {
 				aClass.push('active');
+			}
+			if(this.subtype=='page') {
+				aClass.push('contents');				
 			}
 			return aClass.join(" ");
 		}
@@ -332,6 +349,10 @@ Vue.component('playList', {
 			type: String,
 			default: ""
 		},
+		index: {
+			type: Number,
+			default: 0
+		},
 		title: {
 			type: String,
 			default: ""
@@ -364,6 +385,14 @@ Vue.component('playList', {
 			type: Boolean,
 			default: false
 		},
+		smooth: {
+			type: Boolean,
+			default: false
+		},
+		muted:  {
+			type: Boolean,
+			default: false
+		},
 		group_opened: {
 			type: Boolean,
 			default: false
@@ -386,7 +415,8 @@ Vue.component('playList', {
 	data: function(){
 		return {
 			duration: 0,
-			currentTime: 0
+			currentTime: 0,
+			oSmoothTimer: null
 		};
 	},
 	computed: {
@@ -433,7 +463,7 @@ Vue.component('playList', {
 			}		
 			let oAudio = this.$el? this.$el.querySelector(`#a_${this._id}`) : false;
 			if(oAudio) {
-				oAudio.volume = nVolume/100;
+				oAudio.volume = (nVolume/100);
 			}
 			return nVolume;			
 		},
@@ -465,17 +495,48 @@ Vue.component('playList', {
 			if(!this.plaing) {
 				let oAudio = this.$el? this.$el.querySelector(`#a_${this._id}`): false;
 				if(oAudio) {
-					oAudio.pause();
+					//oAudio.pause();
+					this.onPause(false)
 				}
 			}
 			return this.plaing;
+		},
+		
+		_hotkeys: function(){
+			if(this.index>-1 && this.index<10) {
+				let a = [
+					'1 Q A Z',
+					'2 W S X',
+					'3 E D C',
+					'4 R F V',
+					'5 T G B',
+					'6 Y H N',
+					'7 U J M',
+					'8 I K <',
+					'9 O L >',
+				];
+				
+				return a[this.index];
+			}
+			return "";
 		}
 	},
 	methods: {		
 		/*remove: function(oEvent){
 			this.$emit('remove', oEvent);
 		},*/
-		
+		mute: function(){
+			
+			let oAudio = this.$el.querySelector(`#a_${this._id}`);
+			if(oAudio) {	
+				let sVol = Math.min(0.1, oAudio.volume);
+				oAudio.volume = sVol;
+				setTimeout(()=>{
+					oAudio.volume = (this._volume/100).toFixed(2);
+				}, 1000);
+				
+			}
+		},
 		_convert_time_numbers(nNumber){
 			nNumber = ~~nNumber;
 			return (nNumber<10)? `0${nNumber}` : nNumber;
@@ -490,11 +551,13 @@ Vue.component('playList', {
 			
 			return `00:${this._convert_time_numbers(nSeconds)}`;
 		},
-		onPlay: function(oEvent){
+		onPlay: function(bFire){
 			if(!this.list || !this.list.length) {
 				return false;
 			}
-			this.$emit('play', this.id);
+			if(bFire !== false) {
+				this.$emit('play', this.id);
+			}
 			
 			let oAudio = this.$el.querySelector(`#a_${this._id}`);
 			if(oAudio) {
@@ -503,16 +566,62 @@ Vue.component('playList', {
 				}*/
 				try{
 					oAudio.play();
+					
+					if(this.smooth) {
+						if(this.oSmoothTimer) {
+							clearInterval(this.oSmoothTimer);
+						}
+						let nTmpVolume = oAudio.volume -0.3;
+						if(nTmpVolume<0) {
+							nTmpVolume = 0;
+						}
+						this.oSmoothTimer = setInterval(()=>{
+							if(nTmpVolume>=this._volume/100) {
+								clearInterval(this.oSmoothTimer);
+								oAudio.volume = (this._volume/100).toFixed(2);
+								return;
+							}
+							oAudio.volume =  nTmpVolume.toFixed(2);
+							nTmpVolume+=0.05;;
+							console.log('oAudio.volum', oAudio.volume);
+						}, 100);
+					} else {
+						oAudio.volume = (this._volume/100).toFixed(2);
+					}
+					
 				} catch (error){
 					console.dir(error);
 				}
 			}
 		},		
-		onPause: function(oEvent){
-			this.$emit('pause', this.id);
+		onPause: function(bFire){
+			if(bFire !== false) {
+				this.$emit('pause', this.id);
+			}
 			let oAudio = this.$el.querySelector(`#a_${this._id}`);
 			if(oAudio) {
-				oAudio.pause();
+					
+					if(this.smooth) {
+						if(this.oSmoothTimer) {
+							clearInterval(this.oSmoothTimer);
+						}
+						let nTmpVolume = oAudio.volume;
+						this.oSmoothTimer = setInterval(()=>{
+							if(nTmpVolume<=0) {
+								clearInterval(this.oSmoothTimer);
+								oAudio.volume = 0;
+								oAudio.pause();
+								return false;
+							}
+							oAudio.volume = nTmpVolume.toFixed(2);
+							nTmpVolume-=0.1;
+							console.log('oAudio.volum', oAudio.volume);
+						}, 100);
+					} else {
+						oAudio.volume = (this._volume/100).toFixed(2);
+						oAudio.pause();
+					}
+					
 			}
 		},
 		onRandom: function(oEvent){
@@ -575,7 +684,7 @@ Vue.component('playList', {
 		},
 		
 		addGroup: function(){
-			this.$emit('add_group');
+			this.$emit('add_group', this.id);
 		},
 		onRemove: function(){
 			this.$emit('remove', this.id);
@@ -589,6 +698,7 @@ Vue.component('playList', {
 				let oProgress = this.$el.querySelector(`#pr_${this._id}`);
 				if(oProgress) {
 					oProgress.style.width = `${~~playPercent}%`;
+					//console.log(`${this.currentTime}/${this.duration} - ${~~playPercent}`)
 				}		
 			}
 		}
@@ -596,7 +706,8 @@ Vue.component('playList', {
 	},
 	mounted: function(){
 		//debugger;
-		console.dir(this.$el);
+		//console.dir(this.$el);
+		let that = this;
 		setTimeout(function(){
 			let oAudio = this.$el?this.$el.querySelector(`#a_${this._id}`) : null;
 			if(oAudio) {
@@ -608,7 +719,8 @@ Vue.component('playList', {
 				oAudio.addEventListener('loadeddata', function() {
 					//debugger;
 					if(oAudio.readyState >= 2 && this.plaing) {
-						oAudio.play();
+						//oAudio.play();
+						that.onPlay(false);
 					}
 				}.bind(this));
 				
@@ -618,9 +730,9 @@ Vue.component('playList', {
 		
 		
 	},
-	template: `<div class="player_form" :id="_id" :style="_style">
+	template: `<div class="player_form" :id="_id" :style="_style" :data-color="_color" ref:playlist>
 		<audio :id="audio_id" :src="audio_src" :loop="audio_looped"></audio>
-		<!--<div class="pf_lt">1 Q A Z</div>-->
+		<div class="pf_lt">{{_hotkeys}}</div>
 		<div class="pf_sett">
 			<div class="btns">
 				<input type="checkbox" :checked="loop" :id="cycle_id" class="hide cycle" @change="onLooped">
@@ -825,10 +937,14 @@ Vue.component('pl-group', {
 		<div class='content'>
 			<input type="color" :value="_color" @change="onColorEdited" :list="id">
 			<datalist :id="id">
-        <option>#ff0000</option>/>
-        <option>#00ff00</option>
-        <option>#0000ff</option>
-      </datalist>
+				<option value="#fc801c"/>
+				<option value="#487EC5"/>
+				<option value="#ff2233"/>
+				<option value="#2196F3"/>
+				<option value="#8bc34a"/>
+				<option value="#fdd835"/>
+				<option value="#9c27b0"/>
+			</datalist>
 			<div v-show='!edit' class="name" :title="title"  @click="onSelect">{{title}}</div>
 			<input v-show='edit' :value="title" @change="onTitleEdited" v-on:blur="onTitleEdited" class='cinput'>
 		</div>	
@@ -933,6 +1049,120 @@ Vue.component('icon_item', {
 	
 });
 
+Vue.component('selector', {
+	props: {		
+		selected: {
+			type: String,
+			default: "" // id
+		},				
+		items: {
+			type: Array,
+			default: []
+		}
+	},
+	data: function(){
+		return {
+			opened: false,
+		};
+	},
+	computed: {
+		_title: function(){
+			let oSelected = this.items.find(el=>el.id==this.selected);
+			if(oSelected) {
+				return oSelected.title;
+			}
+			return "";
+		}
+	},
+	methods: {		
+		onDelete: function(oEvent){
+			this.$emit('delete', this.id);
+		},		
+		onSelect: function(oEvent){
+			this.$emit('select', this.id);
+		},	
+		onEdit: function(oEvent){
+			this.editing = !this.editing;
+		},
+		
+		onToggle: function(){
+			this.opened =! this.opened;
+		}
+	},
+	mounted: function(){
+		
+	},
+	template: `<div class="selector">
+		<div class='title_wrapper' @click="onToggle">
+			<div class='title'>{{_title}}</div>
+			<i class="fa fa-arrow-down"></i>
+		</div>
+		<ul :class="{list: true, opened: opened}">
+			<select_item v-for="item in items"
+			:key="item.id"
+			:id="item.id"
+			:title="item.title"
+			:selected="item.id == selected"
+			
+			@select="onSelect"
+			@edited="onEdit"
+			@delete="onDelete"
+			/>
+		</ul>
+	</div>`
+	
+});
+Vue.component('select_item', {
+	props: {		
+		id: {
+			type: String,
+			default: ""
+		},				
+		title: {
+			type: String,
+			default: ""
+		},				
+		selected: {
+			type: Boolean,
+			default: false
+		}
+	},
+	data: function(){
+		return {
+			editing: false
+		};
+	},
+	computed: {
+		
+	},
+	methods: {		
+		onDelete: function(oEvent){
+			this.$emit('delete', this.id);
+		},			
+		onEdited: function(oEvent){
+			this.$emit('edited', this.id, oEvent.target.value);
+		},	
+		onSelect: function(oEvent){
+			this.$emit('select', this.id);
+		},	
+		onEdit: function(oEvent){
+			this.editing = !this.editing;
+		},
+	},
+	mounted: function(){
+		
+	},
+	template: `<li :class="{active: selected}">
+		<div class='content'>
+			<button class='edit' @edit="onEdit"><i class="fa fa-edit"></i></button>
+			<div class='title' v-show="!editing" @click="onSelect">{{title}}</div>
+			<input :value="title" @change="onEdited" v-show="editing">
+		</div>
+		<button class='delete' @delete="onDelete"><i class="fa fa-trash-alt"></i></button>
+	</li>`
+	
+});
+
   var app = new Vue({
     el: '#app',
     data: {
@@ -996,7 +1226,14 @@ Vue.component('icon_item', {
 					edit: false
 				}*/
 			],
-						
+			
+			aProjects: [
+				{
+				 id: "1",
+				 title: "Проект 1"
+				}
+			],
+			
 			aIconNames: [
 				"ad","address-book","address-card","adjust","air-freshener","align-center","align-justify","align-left","align-right","allergies","ambulance","american-sign-language-interpreting","anchor","angle-double-down","angle-double-left","angle-double-right","angle-double-up","angle-down","angle-left","angle-right","angle-up","angry","ankh","apple-alt","archive","archway","arrow-alt-circle-down","arrow-alt-circle-left","arrow-alt-circle-right","arrow-alt-circle-up","arrow-circle-down","arrow-circle-left","arrow-circle-right","arrow-circle-up","arrow-down","arrow-left","arrow-right","arrow-up","arrows-alt","arrows-alt-h","arrows-alt-v","assistive-listening-systems","asterisk","at","atlas","atom","audio-description","award","baby","baby-carriage","backspace","backward","bacon","bahai","balance-scale","balance-scale-left","balance-scale-right","ban","band-aid","barcode","bars","baseball-ball","basketball-ball","bath","battery-empty","battery-full","battery-half","battery-quarter","battery-three-quarters","bed","beer","bell","bell-slash","bezier-curve","bible","bicycle","biking","binoculars","biohazard","birthday-cake","blender","blender-phone","blind","blog","bold","bolt","bomb","bone","bong","book","book-dead","book-medical","book-open","book-reader","bookmark","border-all","border-none","border-style","bowling-ball","box","box-open","boxes","braille","brain","bread-slice","briefcase","briefcase-medical","broadcast-tower","broom","brush","bug","building","bullhorn","bullseye","burn","bus","bus-alt","business-time","calculator","calendar","calendar-alt","calendar-check","calendar-day","calendar-minus","calendar-plus","calendar-times","calendar-week","camera","camera-retro","campground","candy-cane","cannabis","capsules","car","car-alt","car-battery","car-crash","car-side","caravan","caret-down","caret-left","caret-right","caret-square-down","caret-square-left","caret-square-right","caret-square-up","caret-up","carrot","cart-arrow-down","cart-plus","cash-register","cat","certificate","chair","chalkboard","chalkboard-teacher","charging-station","chart-area","chart-bar","chart-line","chart-pie","check","check-circle","check-double","check-square","cheese","chess","chess-bishop","chess-board","chess-king","chess-knight","chess-pawn","chess-queen","chess-rook","chevron-circle-down","chevron-circle-left","chevron-circle-right","chevron-circle-up","chevron-down","chevron-left","chevron-right","chevron-up","child","church","circle","circle-notch","city","clinic-medical","clipboard","clipboard-check","clipboard-list","clock","clone","closed-captioning","cloud","cloud-download-alt","cloud-meatball","cloud-moon","cloud-moon-rain","cloud-rain","cloud-showers-heavy","cloud-sun","cloud-sun-rain","cloud-upload-alt","cocktail","code","code-branch","coffee","cog","cogs","coins","columns","comment","comment-alt","comment-dollar","comment-dots","comment-medical","comment-slash","comments","comments-dollar","compact-disc","compass","compress","compress-alt","compress-arrows-alt","concierge-bell","cookie","cookie-bite","copy","copyright","couch","credit-card","crop","crop-alt","cross","crosshairs","crow","crown","crutch","cube","cubes","cut","database","deaf","democrat","desktop","dharmachakra","diagnoses","dice","dice-d20","dice-d6","dice-five","dice-four","dice-one","dice-six","dice-three","dice-two","digital-tachograph","directions","divide","dizzy","dna","dog","dollar-sign","dolly","dolly-flatbed","donate","door-closed","door-open","dot-circle","dove","download","drafting-compass","dragon","draw-polygon","drum","drum-steelpan","drumstick-bite","dumbbell","dumpster","dumpster-fire","dungeon","edit","egg","eject","ellipsis-h","ellipsis-v","envelope","envelope-open","envelope-open-text","envelope-square","equals","eraser","ethernet","euro-sign","exchange-alt","exclamation","exclamation-circle","exclamation-triangle","expand","expand-alt","expand-arrows-alt","external-link-alt","external-link-square-alt","eye","eye-dropper","eye-slash","fan","fast-backward","fast-forward","fax","feather","feather-alt","female","fighter-jet","file","file-alt","file-archive","file-audio","file-code","file-contract","file-csv","file-download","file-excel","file-export","file-image","file-import","file-invoice","file-invoice-dollar","file-medical","file-medical-alt","file-pdf","file-powerpoint","file-prescription","file-signature","file-upload","file-video","file-word","fill","fill-drip","film","filter","fingerprint","fire","fire-alt","fire-extinguisher","first-aid","fish","fist-raised","flag","flag-checkered","flag-usa","flask","flushed","folder","folder-minus","folder-open","folder-plus","font","football-ball","forward","frog","frown","frown-open","funnel-dollar","futbol","gamepad","gas-pump","gavel","gem","genderless","ghost","gift","gifts","glass-cheers","glass-martini","glass-martini-alt","glass-whiskey","glasses","globe","globe-africa","globe-americas","globe-asia","globe-europe","golf-ball","gopuram","graduation-cap","greater-than","greater-than-equal","grimace","grin","grin-alt","grin-beam","grin-beam-sweat","grin-hearts","grin-squint","grin-squint-tears","grin-stars","grin-tears","grin-tongue","grin-tongue-squint","grin-tongue-wink","grin-wink","grip-horizontal","grip-lines","grip-lines-vertical","grip-vertical","guitar","h-square","hamburger","hammer","hamsa","hand-holding","hand-holding-heart","hand-holding-usd","hand-lizard","hand-middle-finger","hand-paper","hand-peace","hand-point-down","hand-point-left","hand-point-right","hand-point-up","hand-pointer","hand-rock","hand-scissors","hand-spock","hands","hands-helping","handshake","hanukiah","hard-hat","hashtag","hat-cowboy","hat-cowboy-side","hat-wizard","hdd","heading","headphones","headphones-alt","headset","heart","heart-broken","heartbeat","helicopter","highlighter","hiking","hippo","history","hockey-puck","holly-berry","home","horse","horse-head","hospital","hospital-alt","hospital-symbol","hot-tub","hotdog","hotel","hourglass","hourglass-end","hourglass-half","hourglass-start","house-damage","hryvnia","i-cursor","ice-cream","icicles","icons","id-badge","id-card","id-card-alt","igloo","image","images","inbox","indent","industry","infinity","info","info-circle","italic","jedi","joint","journal-whills","kaaba","key","keyboard","khanda","kiss","kiss-beam","kiss-wink-heart","kiwi-bird","landmark","language","laptop","laptop-code","laptop-medical","laugh","laugh-beam","laugh-squint","laugh-wink","layer-group","leaf","lemon","less-than","less-than-equal","level-down-alt","level-up-alt","life-ring","lightbulb","link","lira-sign","list","list-alt","list-ol","list-ul","location-arrow","lock","lock-open","long-arrow-alt-down","long-arrow-alt-left","long-arrow-alt-right","long-arrow-alt-up","low-vision","luggage-cart","magic","magnet","mail-bulk","male","map","map-marked","map-marked-alt","map-marker","map-marker-alt","map-pin","map-signs","marker","mars","mars-double","mars-stroke","mars-stroke-h","mars-stroke-v","mask","medal","medkit","meh","meh-blank","meh-rolling-eyes","memory","menorah","mercury","meteor","microchip","microphone","microphone-alt","microphone-alt-slash","microphone-slash","microscope","minus","minus-circle","minus-square","mitten","mobile","mobile-alt","money-bill","money-bill-alt","money-bill-wave","money-bill-wave-alt","money-check","money-check-alt","monument","moon","mortar-pestle","mosque","motorcycle","mountain","mouse","mouse-pointer","mug-hot","music","network-wired","neuter","newspaper","not-equal","notes-medical","object-group","object-ungroup","oil-can","om","otter","outdent","pager","paint-brush","paint-roller","palette","pallet","paper-plane","paperclip","parachute-box","paragraph","parking","passport","pastafarianism","paste","pause","pause-circle","paw","peace","pen","pen-alt","pen-fancy","pen-nib","pen-square","pencil-alt","pencil-ruler","people-carry","pepper-hot","percent","percentage","person-booth","phone","phone-alt","phone-slash","phone-square","phone-square-alt","phone-volume","photo-video","piggy-bank","pills","pizza-slice","place-of-worship","plane","plane-arrival","plane-departure","play","play-circle","plug","plus","plus-circle","plus-square","podcast","poll","poll-h","poo","poo-storm","poop","portrait","pound-sign","power-off","pray","praying-hands","prescription","prescription-bottle","prescription-bottle-alt","print","procedures","project-diagram","puzzle-piece","qrcode","question","question-circle","quidditch","quote-left","quote-right","quran","radiation","radiation-alt","rainbow","random","receipt","record-vinyl","recycle","redo","redo-alt","registered","remove-format","reply","reply-all","republican","restroom","retweet","ribbon","ring","road","robot","rocket","route","rss","rss-square","ruble-sign","ruler","ruler-combined","ruler-horizontal","ruler-vertical","running","rupee-sign","sad-cry","sad-tear","satellite","satellite-dish","save","school","screwdriver","scroll","sd-card","search","search-dollar","search-location","search-minus","search-plus","seedling","server","shapes","share","share-alt","share-alt-square","share-square","shekel-sign","shield-alt","ship","shipping-fast","shoe-prints","shopping-bag","shopping-basket","shopping-cart","shower","shuttle-van","sign","sign-in-alt","sign-language","sign-out-alt","signal","signature","sim-card","sitemap","skating","skiing","skiing-nordic","skull","skull-crossbones","slash","sleigh","sliders-h","smile","smile-beam","smile-wink","smog","smoking","smoking-ban","sms","snowboarding","snowflake","snowman","snowplow","socks","solar-panel","sort","sort-alpha-down","sort-alpha-down-alt","sort-alpha-up","sort-alpha-up-alt","sort-amount-down","sort-amount-down-alt","sort-amount-up","sort-amount-up-alt","sort-down","sort-numeric-down","sort-numeric-down-alt","sort-numeric-up","sort-numeric-up-alt","sort-up","spa","space-shuttle","spell-check","spider","spinner","splotch","spray-can","square","square-full","square-root-alt","stamp","star","star-and-crescent","star-half","star-half-alt","star-of-david","star-of-life","step-backward","step-forward","stethoscope","sticky-note","stop","stop-circle","stopwatch","store","store-alt","stream","street-view","strikethrough","stroopwafel","subscript","subway","suitcase","suitcase-rolling","sun","superscript","surprise","swatchbook","swimmer","swimming-pool","synagogue","sync","sync-alt","syringe","table","table-tennis","tablet","tablet-alt","tablets","tachometer-alt","tag","tags","tape","tasks","taxi","teeth","teeth-open","temperature-high","temperature-low","tenge","terminal","text-height","text-width","th","th-large","th-list","theater-masks","thermometer","thermometer-empty","thermometer-full","thermometer-half","thermometer-quarter","thermometer-three-quarters","thumbs-down","thumbs-up","thumbtack","ticket-alt","times","times-circle","tint","tint-slash","tired","toggle-off","toggle-on","toilet","toilet-paper","toolbox","tools","tooth","torah","torii-gate","tractor","trademark","traffic-light","trailer","train","tram","transgender","transgender-alt","trash","trash-alt","trash-restore","trash-restore-alt","tree","trophy","truck","truck-loading","truck-monster","truck-moving","truck-pickup","tshirt","tty","tv","umbrella","umbrella-beach","underline","undo","undo-alt","universal-access","university","unlink","unlock","unlock-alt","upload","user","user-alt","user-alt-slash","user-astronaut","user-check","user-circle","user-clock","user-cog","user-edit","user-friends","user-graduate","user-injured","user-lock","user-md","user-minus","user-ninja","user-nurse","user-plus","user-secret","user-shield","user-slash","user-tag","user-tie","user-times","users","users-cog","utensil-spoon","utensils","vector-square","venus","venus-double","venus-mars","vial","vials","video","video-slash","vihara","voicemail","volleyball-ball","volume-down","volume-mute","volume-off","volume-up","vote-yea","vr-cardboard","walking","wallet","warehouse","water","wave-square","weight","weight-hanging","wheelchair","wifi","wind","window-close","window-maximize","window-minimize","window-restore","wine-bottle","wine-glass","wine-glass-alt","won-sign","wrench","x-ray","yen-sign","yin-yang"
 			],
@@ -1072,18 +1309,25 @@ Vue.component('icon_item', {
 				},
 				Sounds: {
 					"SHIFT": false,
-					"CTRL": false,
+					"CTRL": true,
 					"ALT": false,
 				},
-				oKeyPressed :{
+				/*oKeyPressed :{
 					"SHIFT": false,
 					"CTRL": false,
 					"ALT": false,
-				}
+				}*/
 			},
 			aLocalDataDebug: [],
 			bModalWinShow: false,
 			sModalWinCont: "",
+			oSettings: {
+				color: "#fc801c",
+				language: "RU",
+				editMode: false,
+				smoothPlay: false,
+				selectedProject: "1"
+			},
 			oMeta: {
 				bNewVersionAvailable: false,
 				sCurVersion: VERSION,
@@ -1121,6 +1365,7 @@ Vue.component('icon_item', {
 					{
 						type: "switch",
 						//tumblr: "bConfigMode",
+						subtype: "page",
 						id: "config",
 						title: "Настройки",
 						ico: "fas fa-cog",
@@ -1130,11 +1375,20 @@ Vue.component('icon_item', {
 					{
 						type: "switch",
 						//tumblr: "bConfigMode",
+						subtype: "page",
 						id: "info",
 						title: "Справка",
 						ico: "fas fa-info",
 						action: "toggleInfoMode",
 						active: this.pages.Info
+					},
+					{
+						type: "switch",
+						id: "smooth",
+						title: "Плавный перехорд между плейлистами",
+						ico: "fas fa-water",
+						action: "toggleSmoothPlay",
+						active: this.oSettings.smoothPlay
 					},
 					/*{
 						type: "switch",
@@ -1278,7 +1532,11 @@ Vue.component('icon_item', {
 							this.bReady = true;
 							resolve();
 						}, 20);
-					});					
+					});	
+
+					// color
+					let oRoot = document.documentElement;
+					oRoot.style.setProperty('--color_bright', this.oSettings.color);					
 				});
 			},
 			_startDB: function(){
@@ -1358,6 +1616,13 @@ Vue.component('icon_item', {
 				aPlayLists.forEach(PL=>{
 					this.pause(PL.id);
 				});
+			},
+			_mutePlaylists: function(){
+				let oPlayListControls = app.$children.filter(el=>el.$options.name == 'playList');
+				for(let i=0; i < oPlayListControls.length; i++) {
+					oPlayListControls[i].mute();
+				}
+				
 			},
 			play: function(sPlayListId){				
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
@@ -1456,6 +1721,26 @@ Vue.component('icon_item', {
 					this._updateCollection('PlayLists', oPlayList);
 				}
 			},
+			_volumeUp: function(sPlayListId){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {	
+					oPlayList.volume +=10;
+					if(oPlayList.volume>100) {
+						oPlayList.volume = 100;
+					}
+					this._updateCollection('PlayLists', oPlayList);
+				}	
+			},
+			_volumeDown: function(sPlayListId){
+				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
+				if(oPlayList) {	
+					oPlayList.volume -=10;
+					if(oPlayList.volume<0) {
+						oPlayList.volume = 0;
+					}
+					this._updateCollection('PlayLists', oPlayList);
+				}				
+			},
 			volumeChanged: function(sPlayListId, oEvent){
 				//debugger;
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
@@ -1469,13 +1754,14 @@ Vue.component('icon_item', {
 			start_edit_title: function(sPlayListId){
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
-					oPlayList.config.edit = true;
+					this.oSettings.editMode = oPlayList.config.edit = true;
+					
 				}
 			},
 			finish_edit_title: function(sPlayListId, sNewTitle){
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
-					oPlayList.config.edit = false;			
+					this.oSettings.editMode = oPlayList.config.edit = false;			
 					oPlayList.title = sNewTitle;
 					this._updateCollection('PlayLists', oPlayList);
 				}
@@ -1487,10 +1773,10 @@ Vue.component('icon_item', {
 					oPlayList.config.group_opened = !oPlayList.config.group_opened;
 				}
 			},
-			set_group: function(sPlayListId, nGroupId){
+			set_group: function(sPlayListId, nGroupId, bOpen){
 				let oPlayList = this.aPlayLists.find(el=>el.id==sPlayListId);
 				if(oPlayList) {
-					oPlayList.config.group_opened = false;
+					if(bOpen !== true) {oPlayList.config.group_opened = false;}
 					if(oPlayList.group == nGroupId) {
 						oPlayList.group = "";
 					} else {
@@ -1524,15 +1810,37 @@ Vue.component('icon_item', {
 					this._updateCollection('PlayListGroups', oGroup);
 				}
 			},
-			add_group: function(){
+			_getColour: function(aUsedColors){
+				if(!aUsedColors) {
+					aUsedColors = [];
+				}
+				let aColors= [
+						"#fc801c",
+						"#487EC5",
+						"#ff2233",
+						"#2196F3",
+						"#8bc34a",
+						"#fdd835",
+						"#9c27b0"
+				];
+				
+				let sColor = aColors.find(el=>!aUsedColors.includes(el)) || `#${Math.floor(Math.random()*16777215).toString(16)}`;
+				
+				return sColor;
+			},
+			add_group: function(sPlayListId){
+				let aUsedColors = this.aPlayListGroups.map(el=>el.color);
+				
+				let sGroupId = guidGenerator();
 				let oGroup = {					
-					id: guidGenerator(),
+					id: sGroupId,
 					title: "",
-					color: "#ff0000",
+					color: this._getColour(aUsedColors),
 					edit: false
 				};
 				this.aPlayListGroups.push(oGroup);
 				this._addToCollection('PlayListGroups', oGroup);
+				this.set_group(sPlayListId, sGroupId, true);
 			},
 			
 			_addToCollection(sName, oItem){
@@ -1659,8 +1967,8 @@ Vue.component('icon_item', {
 					// получаем тело ответа (см. про этот метод ниже)
 					//debugger;
 					var json = await response.json();
-					console.dir(json);
-					console.log(json[0].tag_name);
+					//console.dir(json);
+					//console.log(json[0].tag_name);
 					let sNewTagName= json[0].tag_name.replace("v","");
 					let aTagName = sNewTagName.split(".");
 					let aVersion = VERSION.split(".");
@@ -1692,32 +2000,119 @@ Vue.component('icon_item', {
 					// }
 					// this._callSounder(arg);
 				// })
+				let aPlaylistVolUpKeys=[
+					'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9'
+				];
+				let aPlaylistVolDowbKeys=[
+					'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO'
+				];
+				let aPlaylistPlayKeys=[
+					'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL'
+				];
+				let aPlaylistNextKeys=[
+					'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'M', 'Comma', 'Period'
+				];
+				
+				let aSoundsKeys=[
+					'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'
+				];
 				document.onkeydown = function(e) {
-						if (e.ctrlKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.CTRL = true;
+					if(!this.oSettings.editMode){
+						// search volume up
+						let nPlaylistUp = aPlaylistVolUpKeys.findIndex(el=>el==e.code);
+						if(nPlaylistUp>-1) {
+							if(
+									this.oHotkeys.PlayLists.SHIFT && e.shiftKey ||
+									this.oHotkeys.PlayLists.CTRL && (e.ctrlKey || e.metaKey) ||
+									this.oHotkeys.PlayLists.ALT && e.altKey ||
+									!(this.oHotkeys.PlayLists.SHIFT || this.oHotkeys.PlayLists.CTRL ||this.oHotkeys.PlayLists.ALT)
+								){
+									let oPlayList = this.aPlayLists.find(el=>el.index==nPlaylistUp);
+									if(oPlayList) {
+										this._volumeUp(oPlayList.id);
+									}
+								}
 						}
-						if (e.shiftKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.SHIFT = true;
+						
+						// search volume down
+						let nPlaylistDown = aPlaylistVolDowbKeys.findIndex(el=>el==e.code);
+						if(nPlaylistDown>-1) {
+							if(
+									this.oHotkeys.PlayLists.SHIFT && e.shiftKey ||
+									this.oHotkeys.PlayLists.CTRL && (e.ctrlKey || e.metaKey) ||
+									this.oHotkeys.PlayLists.ALT && e.altKey ||
+									!(this.oHotkeys.PlayLists.SHIFT || this.oHotkeys.PlayLists.CTRL ||this.oHotkeys.PlayLists.ALT)
+								){
+									let oPlayList = this.aPlayLists.find(el=>el.index==nPlaylistDown);
+									if(oPlayList) {
+										this._volumeDown(oPlayList.id);
+									}
+								}
 						}
-						if (e.altKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.ALT = true;
-						}
+					}
 				}.bind(this);
-				document.onkeyup = function(e) {
-						if (e.ctrlKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.CTRL = false;
+				document.onkeyup = function(e) {					
+					if(!this.oSettings.editMode){
+											
+						// search play
+						let nPlaylistPlay = aPlaylistPlayKeys.findIndex(el=>el==e.code);
+						if(nPlaylistPlay>-1) {
+							let oPlayList = this.aPlayLists.find(el=>el.index==nPlaylistPlay);
+							if(oPlayList) {
+								let oPlayListControl = app.$children.find(el=>el.$options.name == 'playList' && el.id == oPlayList.id);
+								if(
+									this.oHotkeys.PlayLists.SHIFT && e.shiftKey ||
+									this.oHotkeys.PlayLists.CTRL && (e.ctrlKey || e.metaKey) ||
+									this.oHotkeys.PlayLists.ALT && e.altKey ||
+									!(this.oHotkeys.PlayLists.SHIFT || this.oHotkeys.PlayLists.CTRL ||this.oHotkeys.PlayLists.ALT)
+								){
+									if(oPlayList.config.plaing) {
+										oPlayListControl.onPause();		
+									} else {
+										oPlayListControl.onPlay();						
+									}
+									
+								}
+							}
 						}
-						if (e.shiftKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.SHIFT = false;
+						
+						// search next
+						let nPlaylistNext = aPlaylistNextKeys.findIndex(el=>el==e.code);
+						if(nPlaylistNext>-1) {
+							if(
+									this.oHotkeys.PlayLists.SHIFT && e.shiftKey ||
+									this.oHotkeys.PlayLists.CTRL && (e.ctrlKey || e.metaKey) ||
+									this.oHotkeys.PlayLists.ALT && e.altKey ||
+									!(this.oHotkeys.PlayLists.SHIFT || this.oHotkeys.PlayLists.CTRL ||this.oHotkeys.PlayLists.ALT)
+								){
+									let oPlayList = this.aPlayLists.find(el=>el.index==nPlaylistNext);
+									if(oPlayList) {
+										this.nextTrack(oPlayList.id);
+									}
+								}
 						}
-						if (e.altKey || e.metaKey) {
-								this.oHotkeys.oKeyPressed.ALT = false;
+						
+						
+						// sounds 
+						let nSounds = aSoundsKeys.findIndex(el=>el==e.code);
+						if(nSounds>-1) {
+							if(
+									this.oHotkeys.Sounds.SHIFT && e.shiftKey ||
+									this.oHotkeys.Sounds.CTRL && (e.ctrlKey || e.metaKey) ||
+									this.oHotkeys.Sounds.ALT && e.altKey ||
+									!(this.oHotkeys.Sounds.SHIFT || this.oHotkeys.Sounds.CTRL ||this.oHotkeys.Sounds.ALT)
+								){
+									let oSounder = this.aSoundCollections.find(el=>el.index==nSounds);
+									if(oSounder) {
+										let oSounderControl = app.$children.find(el=>el.$options.name == 'sounder' && el.id == oSounder.id);
+										if(oSounderControl) {
+											oSounderControl.itemclick();			
+										}
+									}
+								}
 						}
-						if (e.key === "1") {
-								//e.preventDefault(); // present "Save Page" from getting triggered.
-
-								//alert("The shortcut was pressed");
-						}
+					}
+						
 				}.bind(this);
 			},
 			
@@ -1725,7 +2120,10 @@ Vue.component('icon_item', {
 				nIndex--;
 				if(nIndex>=0 && nIndex<10) {
 					let aSounders = app.$children.filter(el=>el.getRandomSound!=undefined);
+					//this.oSettings.mutedPlay = true;
 					aSounders[nIndex].itemclick();
+					this._mutePlaylists();
+					//setTimeout(()=>{this.oSettings.mutedPlay = false;}, 1000);
 				}
 			},
 			
@@ -1779,11 +2177,11 @@ Vue.component('icon_item', {
 			
 			_saveData: function(sParam) {
 				let aParams= [
-					//"aSoundCollections",
 					"sAppView",
 					"oWinSizes",
 					"oWin",
-					"oHotkeys"
+					"oHotkeys",
+					"oSettings"
 				];
 				if(sParam) {
 					aParams= [sParam];
@@ -1815,7 +2213,8 @@ Vue.component('icon_item', {
 					"sAppView",
 					"oWinSizes",
 					"oWin",
-					"oHotkeys"
+					"oHotkeys",
+					"oSettings"
 				];
 				let that = this;
 				
@@ -1859,6 +2258,7 @@ Vue.component('icon_item', {
 						oSounder.active = true;
 						this._setSoubderEditor(oSounder);
 					} else {
+						this._mutePlaylists();
 						
 					}					
 				}
@@ -1869,7 +2269,7 @@ Vue.component('icon_item', {
 				if(!this.sounder.edit) {
 					this.aSoundCollections.forEach(el=>{el.active=false});
 				}
-				
+				this.oSettings.editMode = this.sounder.edit;
 			},
 			_updateSoundFromEditor: function(){
 				let oEditor = this.sounder.editor;
@@ -1931,7 +2331,6 @@ Vue.component('icon_item', {
 					this._addSound(oItem, f.path);
 				}
 				this._updateSoundFromEditor();
-				//this._saveData();
 			},
 			dropSound: function(oEvent, oItem){
 				let that = this;
@@ -1969,7 +2368,6 @@ Vue.component('icon_item', {
 				this.sounder_press(sNewId);
 				this._addToCollection('Sounds', oSounder);
 				
-				//this._saveData();
 				this._initSortableSounds();
 			},
 			
@@ -1989,17 +2387,7 @@ Vue.component('icon_item', {
 				this._saveData();
 			},
 			
-			/*SoundersReordered: function(){
-				let oNewIdList = {};
-				let aConf = document.querySelectorAll(".sconf");
-				for(let i=0; i<aConf.length; i++) {
-					oNewIdList[aConf[i].dataset.id] = i;
-				}
-				this.aSoundCollections = this.aSoundCollections.sort(function(a,b){
-					return oNewIdList[a.id]-oNewIdList[b.id];
-				});
-				this._saveData();
-			},*/
+			
 			
 			proxy: function(sMethod){
 				this[sMethod]();
@@ -2021,50 +2409,10 @@ Vue.component('icon_item', {
 			toggleInfoMode: function(){
 				this._switchPages('Info');
 			},
-			/*
-			toDefaultView: function(){
-				this.sAppView = "default";	
-				this._saveData("sAppView");	
-				w.setSize(this.oWinSizes["default"].w,this.oWinSizes["default"].h);
-				this._postWindow();
-			},
-			toSquareView: function(){
-				this.sAppView = "square"; 
-				this._saveData("sAppView");	
-				w.setSize(this.oWinSizes["square"].w,this.oWinSizes["square"].h);
-				this._postWindow();
-			},
-			toPanelView: function(){
-				this.sAppView = "panel"; 
-				this._saveData("sAppView");	
-				w.setSize(this.oWinSizes["panel"].w,this.oWinSizes["panel"].h);
-				this._postWindow();
-			},
-			*/
 			
-		/*	_initSortable: function(){				
-				let that = this;
-				setTimeout(function(){
-					let oList = document.getElementById('soundpad');
-					Sortable.create(oList, {
-						handle: ".handler",
-						ghostClass: "drag_ghost",
-						dragClass: "drag_drag",
-						onEnd: that.SoundersReordered
-					});
-				}, 100);
+			toggleSmoothPlay: function(){
+				this.oSettings.smoothPlay = !this.oSettings.smoothPlay;
 			},
-			SoundersReordered: function(){
-				let oNewIdList = {};
-				let aConf = document.querySelectorAll(".sounder");
-				for(let i=0; i<aConf.length; i++) {
-					oNewIdList[aConf[i].dataset.id] = i;
-				}
-				this.aSoundCollections = this.aSoundCollections.sort(function(a,b){
-					return oNewIdList[a.id]-oNewIdList[b.id];
-				});
-				this._saveData();
-			},*/
 			
 			_postWindow() {
 				const { width, height } = remote.screen.getPrimaryDisplay().workAreaSize;
@@ -2132,11 +2480,21 @@ Vue.component('icon_item', {
 				this._saveData("oHotkeys");				
 			},*/
 			
-			setPlayListsHotkey: function(){
-				
+			setPlayListsHotkey: function(oEvent, sKey){
+				this.oHotkeys.PlayLists[sKey] = oEvent.target.checked;
+				this._saveData();
 			},
-			setSoundHotkey: function(){
-				
+			setSoundHotkey: function(oEvent, sKey){
+				this.oHotkeys.Sounds[sKey] = oEvent.target.checked;
+				this._saveData();
+			},
+			
+			theme_color_changed: function(oEvent){
+				let sNewColor = oEvent.target.value;
+				this.oSettings.color = sNewColor;
+				let oRoot = document.documentElement;
+				oRoot.style.setProperty('--color_bright', sNewColor);
+				this._saveData();
 			},
 			
 			quite: function(){

@@ -33,10 +33,17 @@
 							:key="item.id"
 							:title="item.title"
 							:type="item.type"
+							:subtype="item.subtype"
 							:active="item.active"
 							:ico="item.ico"
 							@press="proxy(item.action)">
 						</titem>
+						
+						<selector
+							:items="aProjects"
+							:selected="oSettings.selectedProject"
+							>
+						</selector>
 					</div>
 				</div>
 				
@@ -48,6 +55,7 @@
 								<play-list
 									v-for="playList in aPlayLists"
 									:key="playList.id"
+									:index="playList.index"
 									:id="playList.id"
 									:title="playList.title"
 									:img="playList.img"
@@ -60,6 +68,8 @@
 									:compact="playList.config.compact"
 									:plaing="playList.config.plaing"
 									:edit="playList.config.edit"
+									:smooth="oSettings.smoothPlay"
+									:muted="oSettings.mutedPlay"
 									:group_opened="playList.config.group_opened"
 									
 									:tindex="playList.trackIndex"
@@ -191,53 +201,7 @@
 						</div>
 
 					</div>
-				<!--
-					<div id="soundpad" v-show="!bEditMode && !bConfigMode">
-						<sounder
-							v-for="item in aSoundCollections"
-							:key="item.id"
-							:id="item.id"
-							:title="item.title"
-							:items="item.items"
-							:ico="item.ico"
-						>
-						</sounder>
-					</div>
-					<div id="edit" v-show="bEditMode">
-						<sconf
-							v-for="item0 in aSoundCollections"
-							:key="item0.id"
-							:id="item0.id"
-							:ico="item0.ico"
-							:title="item0.title"
-							:items="item0.items"
-							:iconlist="aIconNames"
-							:ref="'i_'+item0.id"
-							@ico_changed="change_ico($event, item0)"
-							@title_changed="change_title($event, item0)"
-							@remove="remove_sounder(item0)"
-						>
-							<div class='sound_list'>
-								<sounditem v-for="sound in item0.items"
-									:key="sound.src"
-									:src="sound.src"
-									@remove="deleteSound(item0, sound)"
-								>
-								</sounditem>
-							</div>
-							<input 
-								:id="'i_'+item0.id" 
-								class="new_sound" 
-								type="file" 
-								@change="addSound($event, item0)" 
-								accept="audio/*"
-								multiple/>
-							<label :for="'i_'+item0.id" :id="'i_'+item0.id" title='Добавить файл'><span>+</span></label>
-						</sconf>
-
-						<button id='new_sounder' @click="addSounder" title='Добавить...'><span>+</span></button>
-					</div>
-					-->
+			
 					<div v-show="page=='Config'"  class='page'>
 						<div class='content'>
 							<h1>Настройки</h1>
@@ -245,13 +209,13 @@
 								<article>
 									<h2>Горячие клавиши потоков</h2>
 									<p>Для потоков заданы следующие горячие клавиши. Для первого - [1] - воспроизведение/пауза, [Q] - следующий трек, [A] - громче, [Z] - тише. Клавиши идут столбиком, аналогично для следующих потоков. Работает для первых девяти.</p>
-									<p>При нажатии сочетаний ниже будет вызвана соответствующая функция потока.</p>
+									<p>При нажатии сочетаний ниже (всех клавиш одновременно) будет вызвана соответствующая функция потока.</p>
 									<div class='flexParent'>
 										<div class='col middle'>
 											<div>
-												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.SHIFT" @click="setPlayListsHotkey"> SHIFT</label></div>
-												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.CTRL" @click="setPlayListsHotkey"> CTRL</label></div>
-												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.ALT" @click="setPlayListsHotkey"> ALT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.SHIFT" @click="setPlayListsHotkey($event, 'SHIFT')"> SHIFT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.CTRL" @click="setPlayListsHotkey($event, 'CTRL')"> CTRL</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.PlayLists.ALT" @click="setPlayListsHotkey($event, 'ALT')"> ALT</label></div>
 											</div>
 										</div>
 										<div class='col  middle'>
@@ -264,13 +228,13 @@
 								</article>
 								<article>
 									<h2>Горячие клавиши звуков</h2>
-									<p>При нажатии сочетаний ниже будет воспроизведен звук под соответствующей цифрой</p>
+									<p>При нажатии сочетаний ниже (всех клавиш одновременно) будет воспроизведен звук под соответствующей цифрой</p>
 									<div class='flexParent'>
 										<div class='col  middle'>
 											<div>
-												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.SHIFT" @click="setSoundHotkey"> SHIFT</label></div>
-												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.CTRL" @click="setSoundHotkey"> CTRL</label></div>
-												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.ALT" @click="setSoundHotkey"> ALT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.SHIFT" @click="setSoundHotkey($event, 'SHIFT')"> SHIFT</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.CTRL" @click="setSoundHotkey($event, 'CTRL')"> CTRL</label></div>
+												<div><label><input type='checkbox' v-model="oHotkeys.Sounds.ALT" @click="setSoundHotkey($event, 'ALT')"> ALT</label></div>
 											</div>
 										</div>
 										<div class='col  middle'>
@@ -282,6 +246,25 @@
 									</div>
 								</article>
 							</div>
+							
+							<article>
+								<h2>Интерфейс</h2>
+								<div>
+									<label>Акцентный цвет: <input type="color" list="presetColors" :value="oSettings.color" @change="theme_color_changed">
+																					<datalist id="presetColors">
+																						<option value="#fc801c"/>
+																						<option value="#487EC5"/>
+																						<option value="#ff2233"/>
+																						<option value="#2196F3"/>
+																						<option value="#8bc34a"/>
+																						<option value="#fdd835"/>
+																						<option value="#9c27b0"/>
+																					</datalist></label>
+								</div>
+								<div><label>Язык интерфейса:  <button :class="{active: oSettings.language=='RU'}">RU</button></label></div>
+							
+							</article>
+							
 						</div>
 					</div>	
 					
@@ -314,8 +297,7 @@
 								<p>Группы нужны для регулирования одновременного воспроизведения музыки из разных плейлистов. По умолчанию, плейлист не находистя ни в какой группе. Плейлисты без групп, и плейлисты в <i>разных</i> группах могут звучать одновременно.</p>
 								<p>Внутри одной группы может звучать только один плейлист.</p>
 								<p>Зачем это может понадобиться? Напрмер, есть два плейлиста со звуками окружения - ночной лес и дневной. При начале воспроизведения ночного, дневной автоматически станет на паузу. При этом может продолжить звучать другой плейлист с мелодиями.</p>
-								<p>Группы харрактеризуются цветами - можно задать любой. У плейлиста в группе сверху будет цветная полоска, цвет указывает на группу. Группы добавляются/удаляются/редактируются внутри плейлиста.</p>
-								
+								<p>Группы харрактеризуются цветами - можно задать любой. У плейлиста в группе сверху будет цветная полоска, цвет указывает на группу. Группы добавляются/удаляются/редактируются внутри плейлиста.</p>								
 							</article>
 							
 							<article>
@@ -331,6 +313,22 @@
 									<li>Чтобы <b>отредактировать набор звуков</b>, нужно перейти в режим редактирвоания - кнопка <button><i class="fa fa-edit"></i></button> внизу панели звуков, и нажать на кнопку набора звуков.</li>
 								</ul>							
 							</article>
+							
+							<article>
+								<h2>Известные баги</h2>
+								<p>Шкала в плейлистах может неверно отображать оставшееся время. Это вызванно особенностью получения данных. Длительность трека расчитывается из размера файла, но кроме само	 мцзыки в файле хрранятся метаданные, занимающие место.</p>
+								
+													
+							</article>
+							
+							<article>
+								<h2>Всякое</h2>
+								<p>Репозиторий/исходники: <a href='https://github.com/Dr-Tentaculus/DPlayer'>https://github.com/Dr-Tentaculus/DPlayer</a></p>
+								<p>Планы развития: <a href='https://github.com/Dr-Tentaculus/DPlayer/projects/1'>https://github.com/Dr-Tentaculus/DPlayer/projects/1</a></p>
+								<p>О багах писать сюда: <a href='https://github.com/Dr-Tentaculus/DPlayer/issues'>https://github.com/Dr-Tentaculus/DPlayer/issues</a></p>
+													
+							</article>
+							
 						</div>
 					</div>
 				<!-- <pre> -->
