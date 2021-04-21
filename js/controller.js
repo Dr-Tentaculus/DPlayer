@@ -21,6 +21,39 @@ function guidGenerator() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
 
+Vue.directive('click-outside', {
+  bind: function(el, binding, vNode) {
+		// Provided expression must evaluate to a function.
+		if (typeof binding.value !== 'function') {
+			const compName = vNode.context.name
+			let warn = `[Vue-click-outside:] provided expression '${binding.expression}' is not a function, but has to be`
+			if (compName) { warn += `Found in component '${compName}'` }
+			
+			console.warn(warn)
+		}
+		// Define Handler and cache it on the element
+		const bubble = binding.modifiers.bubble
+		const handler = (e) => {
+			if (bubble || (!el.contains(e.target) && el !== e.target)) {
+				binding.value(e)
+			}
+		}
+		el.__vueClickOutside__ = handler
+
+		// add Event Listeners
+		document.addEventListener('click', handler)
+	},
+	
+	unbind: function(el, binding) {
+		// Remove Event Listeners
+		document.removeEventListener('click', el.__vueClickOutside__)
+		el.__vueClickOutside__ = null
+
+	},
+
+  stopProp(event) { event.stopPropagation() }
+})
+
 Vue.component('modalWin', {
 	props: {
 		title: {
@@ -1075,39 +1108,48 @@ Vue.component('selector', {
 		}
 	},
 	methods: {		
-		onDelete: function(oEvent){
-			this.$emit('delete', this.id);
+		onDelete: function(sId){
+			this.$emit('delete', sId);
 		},		
-		onSelect: function(oEvent){
-			this.$emit('select', this.id);
+		onSelect: function(sId){
+			this.$emit('select', sId);
+			this.onClose();
 		},	
-		onEdit: function(oEvent){
-			this.editing = !this.editing;
+		onEdited: function(sId, sValue){
+			this.$emit('edit', sId, sValue);
 		},
 		
 		onToggle: function(){
 			this.opened =! this.opened;
+		},
+		onClose: function(){
+			this.opened = false;
+		},
+		
+		onAdd: function(){
+			this.$emit('add');
 		}
 	},
 	mounted: function(){
 		
 	},
-	template: `<div class="selector">
+	template: `<div class="selector" v-click-outside="onClose">
 		<div class='title_wrapper' @click="onToggle">
 			<div class='title'>{{_title}}</div>
-			<i class="fa fa-arrow-down"></i>
+			<i :class="{fa: true, 'fa-arrow-down': true, opened: opened}"></i>
 		</div>
 		<ul :class="{list: true, opened: opened}">
 			<select_item v-for="item in items"
-			:key="item.id"
-			:id="item.id"
-			:title="item.title"
-			:selected="item.id == selected"
-			
-			@select="onSelect"
-			@edited="onEdit"
-			@delete="onDelete"
+				:key="item.id"
+				:id="item.id"
+				:title="item.title"
+				:selected="item.id == selected"
+				
+				@select="onSelect"
+				@edited="onEdited"
+				@delete="onDelete"
 			/>
+			<li class='add' @click="onAdd" title='Создать новый пустой проект'><i class="fa fa-plus"></i></li>
 		</ul>
 	</div>`
 	
@@ -1140,6 +1182,7 @@ Vue.component('select_item', {
 			this.$emit('delete', this.id);
 		},			
 		onEdited: function(oEvent){
+			this.editing = false;
 			this.$emit('edited', this.id, oEvent.target.value);
 		},	
 		onSelect: function(oEvent){
@@ -1154,11 +1197,11 @@ Vue.component('select_item', {
 	},
 	template: `<li :class="{active: selected}">
 		<div class='content'>
-			<button class='edit' @edit="onEdit"><i class="fa fa-edit"></i></button>
+			<button class='edit' @click="onEdit" title='Редактировать название'><i class="fa fa-edit"></i></button>
 			<div class='title' v-show="!editing" @click="onSelect">{{title}}</div>
-			<input :value="title" @change="onEdited" v-show="editing">
+			<input :value="title" @change="onEdited" v-show="editing" class='cinput'>
 		</div>
-		<button class='delete' @delete="onDelete"><i class="fa fa-trash-alt"></i></button>
+		<button class='delete' @click="onDelete" title='Удалить проект'><i class="fa fa-trash-alt"></i></button>
 	</li>`
 	
 });
@@ -1228,10 +1271,16 @@ Vue.component('select_item', {
 			],
 			
 			aProjects: [
-				{
+				/*{
 				 id: "1",
-				 title: "Проект 1"
-				}
+				 title: "Проект 1",
+				 playlists: [
+					// id
+				 ],
+				 sounds: [
+					//id
+				 ]
+				}*/
 			],
 			
 			aIconNames: [
@@ -1277,7 +1326,7 @@ Vue.component('select_item', {
 				connection: null,
 				DB: null,
 				name: 'DP',
-				version: 2
+				version: 3
 			},
 			sAppView: "default", // square, panel
 			oWinSizes: {
@@ -1476,9 +1525,18 @@ Vue.component('select_item', {
 				if(nHours>22 && nHours<=4) {
 					return "Доброй ночи!";
 				}
-			}
+			},
 			
-			
+			aPlaylistsInProject: function(){
+				let sId = this.oSettings.selectedProject;
+				
+				return this.aPlayLists.filter(el=>el.project == sId);
+			},
+			aSoundsInProject: function(){
+				let sId = this.oSettings.selectedProject;
+				
+				return this.aSoundCollections.filter(el=>el.project == sId);
+			},
 		},
 		created: function(){
 			this.start();
@@ -1523,8 +1581,8 @@ Vue.component('select_item', {
 			start: function(){
 				return new Promise((resolve, reject)=>{
 					this._loadData();
-					this._startDB().then(()=>{
-						this._loadFromDB();
+					this._startDB().then(async ()=>{
+						await this._loadFromDB();
 						this.sounder.edit = false;
 						this.edit_sounds();
 					
@@ -1539,6 +1597,7 @@ Vue.component('select_item', {
 					oRoot.style.setProperty('--color_bright', this.oSettings.color);					
 				});
 			},
+			
 			_startDB: function(){
 				return new Promise((resolve, reject)=>{
 					this.db.connection = indexedDB.open(this.db.name, this.db.version);
@@ -1564,6 +1623,9 @@ Vue.component('select_item', {
 						}
 						if (!this.db.DB.objectStoreNames.contains('Sounds')) { 
 							this.db.DB.createObjectStore('Sounds', {keyPath: 'id'}); 
+						}
+						if (!this.db.DB.objectStoreNames.contains('Projects')) { 
+							this.db.DB.createObjectStore('Projects', {keyPath: 'id'}); 
 						}
 						
 						//resolve();
@@ -1593,15 +1655,31 @@ Vue.component('select_item', {
 				});
 				
 			},
-			_loadFromDB: async function(){				
+			_loadFromDB: async function(){	
+					
+					let aProjects = await this._getCollection('Projects');
+					if(aProjects && aProjects.length>0) {
+						this.aProjects = aProjects;
+						let oProject = this.aProjects.find(el=>el.id == this.oSettings.selectedProject);
+						if(!oProject) {
+							this.oSettings.selectedProject = this.aProjects[0].id;
+						}
+					}	else {
+						let sId = this.addProject();
+						this.oSettings.selectedProject = sId;
+					}
+					
 					let aPlayLists = await this._getCollection('PlayLists');
 					if(aPlayLists) {
 						this.aPlayLists = aPlayLists.sort((a,b)=>a.index-b.index);
+						this.aPlayLists.forEach(el=>{if(!el.project) {el.project = this.oSettings.selectedProject}});
 					}				
+					
 					let aPlayListGroups = await this._getCollection('PlayListGroups');
 					if(aPlayListGroups) {
 						this.aPlayListGroups = aPlayListGroups;
-					}				
+					}			
+					
 					let aSoundCollections = await this._getCollection('Sounds');
 					if(aSoundCollections) {
 						this.aSoundCollections = aSoundCollections.sort((a,b)=>a.index-b.index);
@@ -1609,8 +1687,94 @@ Vue.component('select_item', {
 							oSounder.active = false;
 						});
 						this.sounder.edit = false;
-					}
+					}	
+					
 			},
+		
+
+			_addToCollection(sName, oItem){
+				return new Promise((resolve, reject) => {
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+			
+					let request = collection.add(oItem); // (3)
+
+					request.onsuccess = function() { // (4)
+						console.log("Добавлено", request.result);
+						resolve();
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			_updateCollection(sName, oItem){ // 
+				return new Promise((resolve, reject) => {
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+			
+					let request = collection.put(oItem); // (3)
+
+					request.onsuccess = function() { // (4)
+						console.log("Обновлено", request.result);
+						resolve();
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			_removeFromCollection(sName, oItem){ // 
+				return new Promise((resolve, reject) => {
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+			
+					let request = collection.delete(oItem.id); // (3)
+
+					request.onsuccess = function() { // (4)
+						console.log("Обновлено", request.result);
+						resolve();
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			_getCollection(sName){
+				return new Promise((resolve, reject) => {					
+					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
+
+					// получить хранилище объектов для работы с ним
+					let collection = transaction.objectStore(sName); // (2)
+					debugger;
+					let request = collection.getAll(); // (3)
+
+					request.onsuccess = function() { // (4)
+						//console.log("Добавлено", request.result);
+						debugger;
+						resolve(request.result);
+					};
+
+					request.onerror = function() {
+						console.log("Ошибка", request.error);
+						reject();
+					};
+				});
+			},
+			
+
 			_groupPause: function(sGroupId){
 				let aPlayLists = this.aPlayLists.filter(el=>el.group==sGroupId);
 				aPlayLists.forEach(PL=>{
@@ -1843,88 +2007,6 @@ Vue.component('select_item', {
 				this.set_group(sPlayListId, sGroupId, true);
 			},
 			
-			_addToCollection(sName, oItem){
-				return new Promise((resolve, reject) => {
-					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
-
-					// получить хранилище объектов для работы с ним
-					let collection = transaction.objectStore(sName); // (2)
-			
-					let request = collection.add(oItem); // (3)
-
-					request.onsuccess = function() { // (4)
-						console.log("Добавлено", request.result);
-						resolve();
-					};
-
-					request.onerror = function() {
-						console.log("Ошибка", request.error);
-						reject();
-					};
-				});
-			},
-			_updateCollection(sName, oItem){ // 
-				return new Promise((resolve, reject) => {
-					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
-
-					// получить хранилище объектов для работы с ним
-					let collection = transaction.objectStore(sName); // (2)
-			
-					let request = collection.put(oItem); // (3)
-
-					request.onsuccess = function() { // (4)
-						console.log("Обновлено", request.result);
-						resolve();
-					};
-
-					request.onerror = function() {
-						console.log("Ошибка", request.error);
-						reject();
-					};
-				});
-			},
-			_removeFromCollection(sName, oItem){ // 
-				return new Promise((resolve, reject) => {
-					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
-
-					// получить хранилище объектов для работы с ним
-					let collection = transaction.objectStore(sName); // (2)
-			
-					let request = collection.delete(oItem.id); // (3)
-
-					request.onsuccess = function() { // (4)
-						console.log("Обновлено", request.result);
-						resolve();
-					};
-
-					request.onerror = function() {
-						console.log("Ошибка", request.error);
-						reject();
-					};
-				});
-			},
-			_getCollection(sName){
-				return new Promise((resolve, reject) => {					
-					let transaction = this.db.DB.transaction(sName, "readwrite"); // (1)
-
-					// получить хранилище объектов для работы с ним
-					let collection = transaction.objectStore(sName); // (2)
-					debugger;
-					let request = collection.getAll(); // (3)
-
-					request.onsuccess = function() { // (4)
-						//console.log("Добавлено", request.result);
-						debugger;
-						resolve(request.result);
-					};
-
-					request.onerror = function() {
-						console.log("Ошибка", request.error);
-						reject();
-					};
-				});
-			},
-			
 			add_playlist: function(){
 				let oPlayList = {
 					id: guidGenerator(),
@@ -1941,6 +2023,7 @@ Vue.component('select_item', {
 						group_opened: false
 					},
 					volume: 50,
+					project: this.oSettings.selectedProject,
 					trackIndex: 0,
 					list: [						
 					]
@@ -2355,12 +2438,14 @@ Vue.component('select_item', {
 				if(this.aSoundCollections.find(el=>el.id==sNewId)) {
 					sNewId = guidGenerator();
 				}
+				
 				let oSounder = {
 					title: "",
 					id: sNewId,
 					ico: this.aIconNames[randd(0, this.aIconNames.length)],
 					items: [],
-					index: this.aSoundCollections.length
+					index: this.aSoundCollections.length,
+					project: this.oSettings.selectedProject
 				};
 				this.aSoundCollections.push(oSounder);
 				
@@ -2387,6 +2472,62 @@ Vue.component('select_item', {
 				this._saveData();
 			},
 			
+			// projects
+			
+			addProject: function(){
+				let sNewId = guidGenerator();
+				let oProject = {
+					title: `Проект ${this.aProjects.length+1}`,
+					id: sNewId
+				};
+				this.aProjects.push(oProject);
+				this._addToCollection('Projects', oProject);
+				
+				return sNewId;
+			},
+			editProject: function(sId, sValue){
+				let oProject = this.aProjects.find(el=>el.id == sId);
+				if(oProject) {
+					oProject.title = sValue;
+					
+					this._updateCollection('Projects', oProject);
+				}
+			},
+			selectProject: function(sId){
+				let oProject = this.aProjects.find(el=>el.id == sId);
+				if(oProject) {
+					this.oSettings.selectedProject = sId;
+					this._updateCollection('Projects', oProject);
+				}
+			},
+			deleteProject: function(sId){
+				let oProject = this.aProjects.find(el=>el.id == sId);
+				let oProjectIndex = this.aProjects.findIndex(el=>el.id == sId);
+				if(oProject) {
+					this.aProjects.splice(oProjectIndex, 1);
+					this._removeFromCollection('Projects', oProject);
+				}
+			},
+
+
+			removePlaylistFromProject: function(sId){
+				let sProjectId = this.oSettings.selectProject;
+				let oProject = this.aProjects.find(el=>el.id == sProjectId);
+				if(oProject) {
+					oProject.playlists.push(sId);
+					
+					this._updateCollection('Projects', oProject);
+				}
+			},
+			removeSoundFromProject: function(sId){
+				let sProjectId = this.oSettings.selectProject;
+				let oProject = this.aProjects.find(el=>el.id == sProjectId);
+				if(oProject) {
+					oProject.sounds.push(sId);
+					
+					this._updateCollection('Projects', oProject);
+				}
+			},
 			
 			
 			proxy: function(sMethod){

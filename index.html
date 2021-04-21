@@ -42,6 +42,11 @@
 						<selector
 							:items="aProjects"
 							:selected="oSettings.selectedProject"
+							
+							@add="addProject"
+							@edit="editProject"
+							@select="selectProject"
+							@delete="deleteProject"
 							>
 						</selector>
 					</div>
@@ -50,10 +55,10 @@
 				
 				<div id='main' v-cloak>
 					<div class='page flexParent' v-show="page=='PlayLists'" >
-						<div style='flex-grow: 99'>
+						<div style='flex-grow: 99' id='playListsWrapper'>
 							<div id='playLists' >
 								<play-list
-									v-for="playList in aPlayLists"
+									v-for="playList in aPlaylistsInProject"
 									:key="playList.id"
 									:index="playList.index"
 									:id="playList.id"
@@ -116,7 +121,7 @@
 								<div id="soundpad">
 									<div id="sounds_wrapper">
 										<sounder
-											v-for="item in aSoundCollections"
+											v-for="item in aSoundsInProject"
 											:key="item.id"
 											:id="item.id"
 											:title="item.title"

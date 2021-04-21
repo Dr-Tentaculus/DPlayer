@@ -509,6 +509,9 @@ input:checked + label:hover {
   flex-grow: 9;
   position: relative;
 }
+#app #main > .page {
+  flex-wrap: nowrap;
+}
 #app .page {
   overflow: auto;
   position: absolute;
@@ -755,6 +758,34 @@ input:checked + label:hover {
     box-shadow: 0px -6px 6px var(--color-shadow);
   }
 }
+#sounds_wrapper::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#sounds_wrapper::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#sounds_wrapper::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#sounds_wrapper body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
+}
+#sounds_wrapper::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#sounds_wrapper::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#sounds_wrapper::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#sounds_wrapper body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
+}
 #soundpad_wrapper {
   position: relative;
   display: flex;
@@ -791,6 +822,7 @@ input:checked + label:hover {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  overflow: auto;
 }
 #sound_editor {
   position: absolute;
@@ -814,6 +846,7 @@ input:checked + label:hover {
   justify-content: space-around;
   flex-wrap: wrap;
   align-items: stretch;
+  flex-wrap: nowrap;
   overflow-y: auto;
   margin-right: var(--padding);
   flex-direction: column;
@@ -1132,6 +1165,7 @@ input:checked + label:hover {
   flex-basis: 3rem;
   min-width: 3rem;
   max-width: 3rem;
+  min-height: 3rem;
   -webkit-app-region: no-drag;
 }
 #new_sounder .col.middle {
@@ -1291,6 +1325,8 @@ input:checked + label:hover {
   z-index: 999999;
 }
 .selector .title_wrapper {
+  flex-grow: 1;
+  padding: var(--padding);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1301,6 +1337,10 @@ input:checked + label:hover {
 }
 .selector .title_wrapper i {
   color: var(--m-gray);
+  transition: transform 0.2s, color 0.2s;
+}
+.selector .title_wrapper > i.opened {
+  transform: rotate(180deg);
 }
 .selector .title_wrapper:hover {
   color: var(--white);
@@ -1320,7 +1360,8 @@ input:checked + label:hover {
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: 0 2rem 2rem var(--color-shadow);
   background: var(--d-gray);
-  transition: max-height 0.2s;
+  border: 1px solid var(--dl-gray);
+  transition: max-height 0.4s;
 }
 .selector .list::-webkit-scrollbar {
   width: 5px;
@@ -1372,7 +1413,16 @@ input:checked + label:hover {
 .selector .list .content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: start;
+  overflow: hidden;
+}
+.selector .list .add {
+  padding: var(--padding);
+  display: flex;
+  justify-content: center;
+}
+.selector .list .add:active {
+  color: var(--color_bright);
 }
 .selector button {
   background: transparent;
@@ -1408,6 +1458,37 @@ input:checked + label:hover {
 .tracklist_drag {
   box-shadow: 0 0 10px 3px var(--color);
   transform: scale(1.1);
+}
+#playListsWrapper {
+  overflow: auto;
+}
+#playListsWrapper::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#playListsWrapper::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#playListsWrapper::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#playListsWrapper body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
+}
+#playListsWrapper::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#playListsWrapper::-webkit-scrollbar-thumb {
+  background: var(--md-gray);
+}
+#playListsWrapper::-webkit-scrollbar-track {
+  background: var(--dl-gray);
+}
+#playListsWrapper body {
+  scrollbar-face-color: var(--md-gray);
+  scrollbar-track-color: var(--dl-gray);
 }
 #playLists {
   display: flex;
@@ -2558,8 +2639,15 @@ input:checked + label:hover {
 }
 @media only screen and (max-width: 400px) {
   #soundpad_wrapper,
-  #soundpad {
+  #soundpad,
+  #sounds_wrapper {
     flex-direction: row;
+  }
+  #sounds_wrapper {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    display: flex;
   }
   #soundpad_wrapper {
     box-shadow: 0px -6px 6px var(--color-shadow);

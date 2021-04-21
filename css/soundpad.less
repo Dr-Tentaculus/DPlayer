@@ -1,4 +1,6 @@
-
+#sounds_wrapper{
+	.scrollbars(5px, var(--md-gray), var(--dl-gray));
+}
 #soundpad_wrapper{
 	position: relative;
 	display: flex;
@@ -42,6 +44,7 @@
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
+	overflow: auto;
 }
 
 #sound_editor{
@@ -66,6 +69,7 @@
 
 #soundpad{
 	.flexParent();
+	flex-wrap: nowrap;
 	overflow-y: auto;	
 	margin-right: var(--padding);
 
@@ -211,6 +215,7 @@
 	flex-basis: @size;
 	min-width:@size;
   max-width: @size;
+  min-height: @size;
 	-webkit-app-region: no-drag;
 	&:hover{
 		background: var(--m-gray);
