@@ -1584,7 +1584,7 @@ Vue.component('select_item', {
 					this._startDB().then(async ()=>{
 						await this._loadFromDB();
 						this.sounder.edit = false;
-						this.edit_sounds();
+						//this.edit_sounds();
 					
 						setTimeout(()=>{
 							this.bReady = true;
@@ -1685,6 +1685,7 @@ Vue.component('select_item', {
 						this.aSoundCollections = aSoundCollections.sort((a,b)=>a.index-b.index);
 						this.aSoundCollections.forEach(oSounder=>{
 							oSounder.active = false;
+							if(!oSounder.project) {oSounder.project = this.oSettings.selectedProject}
 						});
 						this.sounder.edit = false;
 					}	
@@ -2075,6 +2076,7 @@ Vue.component('select_item', {
 				shell.openExternal(this.sNewVersionLink);
 			},
 			_setHotkeys: function(){
+				this.oSettings.editMode = false;
 				//this._registerHotkeys();
 				// ipcRenderer.on('hotkey_press', (event, arg) => {
 					// console.log(arg);
